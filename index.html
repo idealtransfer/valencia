@@ -15,7 +15,7 @@
         body { font-family: sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select, textarea { 
+        input, select { 
             width: 100%; padding: 10px; border: 1px solid var(--hint-color); 
             border-radius: 8px; background: var(--bg-color); color: var(--text-color);
             box-sizing: border-box;
@@ -30,50 +30,50 @@
     </style>
 </head>
 <body>
-    <h3>Трансфер Валенсия</h3>
+    <h3 id="ui-title">Трансфер Валенсия</h3>
     
     <div class="form-group">
-        <label>Откуда (Адрес или точка)</label>
-        <input type="text" id="pickup" placeholder="Напр: Aeropuerto de Valencia / Адрес">
+        <label id="lbl-pickup">Откуда</label>
+        <input type="text" id="pickup">
     </div>
 
     <div class="form-group">
-        <label>Куда</label>
-        <input type="text" id="destination" placeholder="Напр: Hotel Las Arenas / Адрес">
+        <label id="lbl-dest">Куда</label>
+        <input type="text" id="destination">
     </div>
 
     <div class="row">
         <div class="form-group">
-            <label>Дата</label>
+            <label id="lbl-date">Дата</label>
             <input type="date" id="date">
         </div>
         <div class="form-group">
-            <label>Время</label>
+            <label id="lbl-time">Время</label>
             <input type="time" id="time">
         </div>
     </div>
 
     <div class="form-group">
-        <label>Номер рейса (если из аэропорта)</label>
-        <input type="text" id="flight" placeholder="Напр: FR2044">
+        <label id="lbl-flight">Номер рейса</label>
+        <input type="text" id="flight">
     </div>
 
     <div class="row">
         <div class="form-group">
-            <label>Люди (взр/дет)</label>
-            <input type="text" id="passengers" placeholder="Напр: 2/1">
+            <label id="lbl-pass">Люди (взр/дет)</label>
+            <input type="text" id="passengers">
         </div>
         <div class="form-group">
-            <label>Багаж (крупный)</label>
+            <label id="lbl-luggage">Багаж</label>
             <input type="number" id="luggage" value="0">
         </div>
     </div>
 
     <div class="form-group">
-        <label>Оплата</label>
+        <label id="lbl-pay">Оплата</label>
         <select id="payment">
-            <option value="cash">Наличные</option>
-            <option value="card">Картой (ссылка)</option>
+            <option value="cash" id="opt-cash">Наличные</option>
+            <option value="card" id="opt-card">Карта (ссылка)</option>
             <option value="paypal">PayPal</option>
             <option value="wise">Wise</option>
             <option value="sepa">SEPA</option>
@@ -81,16 +81,55 @@
     </div>
 
     <div class="form-group">
-        <label>Имя и Телефон</label>
-        <input type="text" id="contact" placeholder="+34 ...">
+        <label id="lbl-contact">Имя и Телефон</label>
+        <input type="text" id="contact">
     </div>
 
-    <button id="order-btn">Забронировать трансфер</button>
+    <button id="order-btn">Заказать</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // СЛОВАРЬ ПЕРЕВОДОВ
+        const translations = {
+            ru: {
+                title: "Трансфер Валенсия", pickup: "Откуда", dest: "Куда", date: "Дата", time: "Время",
+                flight: "Номер рейса", pass: "Люди (взр/дет)", luggage: "Багаж", pay: "Оплата",
+                contact: "Имя и Телефон", order: "Забронировать", cash: "Наличные", card: "Картой"
+            },
+            es: {
+                title: "Traslado Valencia", pickup: "Origen", dest: "Destino", date: "Fecha", time: "Hora",
+                flight: "Nº de vuelo", pass: "Pasajeros", luggage: "Equipaje", pay: "Pago",
+                contact: "Nombre и Teléfono", order: "Reservar", cash: "Efectivo", card: "Tarjeta"
+            },
+            en: {
+                title: "Valencia Transfer", pickup: "From", dest: "To", date: "Date", time: "Time",
+                flight: "Flight number", pass: "Passengers", luggage: "Luggage", pay: "Payment",
+                contact: "Name and Phone", order: "Book Now", cash: "Cash", card: "By card"
+            }
+        };
+
+        // ОПРЕДЕЛЕНИЕ ЯЗЫКА
+        const userLang = tg.initDataUnsafe.user.language_code || 'en';
+        const lang = translations[userLang] || translations.en;
+
+        // ПРИМЕНЕНИЕ ПЕРЕВОДОВ
+        document.getElementById('ui-title').innerText = lang.title;
+        document.getElementById('lbl-pickup').innerText = lang.pickup;
+        document.getElementById('lbl-dest').innerText = lang.dest;
+        document.getElementById('lbl-date').innerText = lang.date;
+        document.getElementById('lbl-time').innerText = lang.time;
+        document.getElementById('lbl-flight').innerText = lang.flight;
+        document.getElementById('lbl-pass').innerText = lang.pass;
+        document.getElementById('lbl-luggage').innerText = lang.luggage;
+        document.getElementById('lbl-pay').innerText = lang.pay;
+        document.getElementById('lbl-contact').innerText = lang.contact;
+        document.getElementById('order-btn').innerText = lang.order;
+        document.getElementById('opt-cash').innerText = lang.cash;
+        document.getElementById('opt-card').innerText = lang.card;
+
+        // ОТПРАВКА ДАННЫХ
         document.getElementById('order-btn').addEventListener('click', () => {
             const data = {
                 pickup: document.getElementById('pickup').value,
@@ -103,13 +142,6 @@
                 payment: document.getElementById('payment').value,
                 contact: document.getElementById('contact').value
             };
-
-            if(!data.pickup || !data.contact) {
-                alert("Пожалуйста, заполните основные поля");
-                return;
-            }
-
-            // Отправка данных боту
             tg.sendData(JSON.stringify(data));
         });
     </script>
