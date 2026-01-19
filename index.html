@@ -32,16 +32,16 @@
     </style>
 </head>
 <body>
-    <h3 id="ui-title">Ideal Transfer Valencia</h3>
+    <h3 id="ui-title">Your ideal transfer in Valencia</h3>
     
-    <div class="form-group">
-        <label id="lbl-pickup">Откуда</label>
-        <input type="text" id="pickup" placeholder="...">
+   <div class="form-group">
+        <label>Откуда (Адрес или точка)</label>
+        <input type="text" id="pickup" placeholder="Ex: Aeropuerto de Valencia / Address">
     </div>
 
-    <div class="form-group">
-        <label id="lbl-dest">Куда</label>
-        <input type="text" id="destination" placeholder="...">
+   <div class="form-group">
+        <label>Куда</label>
+        <input type="text" id="destination" placeholder="Ex: Hotel Las Arenas / Address">
     </div>
 
     <div class="row">
@@ -56,21 +56,25 @@
     </div>
 
     <div class="form-group">
-        <label id="lbl-flight">Номер рейса</label>
+        <label id="lbl-flight">Номер рейса (если из аэропорта)</label>
         <input type="text" id="flight" placeholder="Ex: FR2044">
     </div>
 
     <div class="row">
         <div class="form-group">
             <label id="lbl-pass">Пассажиры (взрослые)</label>
-            <input type="text" id="passengers" placeholder="3">
+            <input type="number" id="passengers" placeholder="3">
         </div>
         <div class="form-group">
-            <label id="lbl-pass">Дети (дети)</label>
-            <input type="text" id="passengers" placeholder="1">
+            <label id="lbl-pass">Дети (бустер, до 135 см)</label>
+            <input type="number" id="passengers" placeholder="1">
         </div>
         <div class="form-group">
-            <label id="lbl-luggage">Багаж</label>
+            <label id="lbl-pass">Дети (кресло, до 125 см)</label>
+            <input type="number" id="passengers" placeholder="1">
+        </div>
+        <div class="form-group">
+            <label id="lbl-luggage">Багаж (чемоданы)</label>
             <input type="number" id="luggage" value="0">
         </div>
     </div>
@@ -79,25 +83,26 @@
         <label id="lbl-pay">Оплата</label>
         <select id="payment">
             <option value="cash" id="opt-cash">Наличные</option>
-            <option value="card" id="opt-card">Карта (ссылка)</option>
+            <option value="card" id="opt-card">Visa/MasterCard</option>
             <option value="paypal">PayPal</option>
             <option value="wise">Wise</option>
-            <option value="sepa">SEPA</option>
+            <option value="sepa">SEPA transfer</option>
+            <option value="usdt">USDT</option>
         </select>
     </div>
 
     <div class="row">
         <div class="form-group">
             <label id="lbl-name">Имя</label>
-            <input type="text" id="user_name" placeholder="">
+            <input type="text" id="user_name" placeholder="Ivan">
         </div>
         <div class="form-group">
-            <label id="lbl-phone">Телефон</label>
+            <label id="lbl-phone">Телефон/WhatsApp</label>
             <input type="tel" id="user_phone" placeholder="+34...">
         </div>
     </div>
 
-    <button id="order-btn">Забронировать</button>
+    <button id="order-btn">Забронировать поездку</button>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -107,25 +112,27 @@
         // СЛОВАРЬ ПЕРЕВОДОВ
         const translations = {
             ru: {
-                title: "Трансфер Валенсия", pickup: "Откуда (Адрес или точка)", dest: "Куда", 
-                date: "Дата", time: "Время", flight: "Номер рейса (VLC)", 
-                pass: "Пассажиры (взр/дет)", luggage: "Чемоданы", pay: "Способ оплаты",
-                name: "Имя", phone: "Телефон", order: "Забронировать",
-                cash: "Наличные", card: "Картой (ссылка)"
+                title: "Ваш идеальный трансфер в Валенсии", pickup: "Откуда (Адрес или точка)", dest: "Куда", 
+                date: "Дата", time: "Время", flight: "Номер рейса", 
+                pass: "Пассажиры (взрослые)", pass: Дети "(бустер, до 135 см)", pass: Дети "(кресло, до 125 см)" 
+                luggage: "Чемоданы", pay: "Способ оплаты",
+                name: "Имя", phone: "Телефон", order: "Забронировать поездку",
+                cash: "Наличные"
             },
             es: {
-                title: "Traslado Valencia", pickup: "Origen (Dirección o punto)", dest: "Destino", 
-                date: "Fecha", time: "Hora", flight: "Nº de vuelo (VLC)", 
-                pass: "Pasajeros", luggage: "Equipaje", pay: "Método de pago",
+                title: "Your ideal transfer in Valencia", pickup: "Origen (Dirección o punto)", dest: "Destino", 
+                date: "Fecha", time: "Hora", flight: "Nº de vuelo", 
+                pass: "Pasajeros (adultos)", pass: Niños "(booster, hasta 135 cm)", pass: Niños "(silla, hasta 125 cm)"
+                luggage: "Equipaje (maleteras)", pay: "Método de pago",
                 name: "Nombre", phone: "Teléfono", order: "Reservar ahora",
-                cash: "Efectivo", card: "Tarjeta (enlace)"
+                cash: "Efectivo"
             },
             en: {
-                title: "Valencia Transfer", pickup: "Pickup (Address or point)", dest: "Destination", 
-                date: "Date", time: "Time", flight: "Flight number (VLC)", 
+                title: "Your ideal transfer in Valencia", pickup: "Pickup (Address or point)", dest: "Destination", 
+                date: "Date", time: "Time", flight: "Flight number", 
                 pass: "Passengers", luggage: "Luggage", pay: "Payment method",
-                name: "Name", phone: "Phone", order: "Book Now",
-                cash: "Cash", card: "By card (link)"
+                name: "Name", phone: "Phone", order: "Book Transfer Now",
+                cash: "Cash"
             }
         };
 
