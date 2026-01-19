@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #ffffff);
+            --text-color: var(--tg-theme-text-color, #000000);
+            --hint-color: var(--tg-theme-hint-color, #999999);
+            --btn-color: var(--tg-theme-button-color, #248bed);
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+        }
+        body { font-family: sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input, select, textarea { 
+            width: 100%; padding: 10px; border: 1px solid var(--hint-color); 
+            border-radius: 8px; background: var(--bg-color); color: var(--text-color);
+            box-sizing: border-box;
+        }
+        .row { display: flex; gap: 10px; }
+        .row > div { flex: 1; }
+        button#order-btn { 
+            width: 100%; padding: 15px; background: var(--btn-color); 
+            color: var(--btn-text); border: none; border-radius: 10px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Трансфер Валенсия</h3>
+    
+    <div class="form-group">
+        <label>Откуда (Адрес или точка)</label>
+        <input type="text" id="pickup" placeholder="Напр: Aeropuerto de Valencia / Адрес">
+    </div>
+
+    <div class="form-group">
+        <label>Куда</label>
+        <input type="text" id="destination" placeholder="Напр: Hotel Las Arenas / Адрес">
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label>Дата</label>
+            <input type="date" id="date">
+        </div>
+        <div class="form-group">
+            <label>Время</label>
+            <input type="time" id="time">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Номер рейса (если из аэропорта)</label>
+        <input type="text" id="flight" placeholder="Напр: FR2044">
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label>Люди (взр/дет)</label>
+            <input type="text" id="passengers" placeholder="Напр: 2/1">
+        </div>
+        <div class="form-group">
+            <label>Багаж (крупный)</label>
+            <input type="number" id="luggage" value="0">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Оплата</label>
+        <select id="payment">
+            <option value="cash">Наличные</option>
+            <option value="card">Картой (ссылка)</option>
+            <option value="paypal">PayPal</option>
+            <option value="wise">Wise</option>
+            <option value="sepa">SEPA</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Имя и Телефон</label>
+        <input type="text" id="contact" placeholder="+34 ...">
+    </div>
+
+    <button id="order-btn">Забронировать трансфер</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        document.getElementById('order-btn').addEventListener('click', () => {
+            const data = {
+                pickup: document.getElementById('pickup').value,
+                destination: document.getElementById('destination').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                flight: document.getElementById('flight').value,
+                passengers: document.getElementById('passengers').value,
+                luggage: document.getElementById('luggage').value,
+                payment: document.getElementById('payment').value,
+                contact: document.getElementById('contact').value
+            };
+
+            if(!data.pickup || !data.contact) {
+                alert("Пожалуйста, заполните основные поля");
+                return;
+            }
+
+            // Отправка данных боту
+            tg.sendData(JSON.stringify(data));
+        });
+    </script>
+</body>
+</html>
