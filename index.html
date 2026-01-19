@@ -11,35 +11,37 @@
             --hint-color: var(--tg-theme-hint-color, #999999);
             --btn-color: var(--tg-theme-button-color, #248bed);
             --btn-text: var(--tg-theme-button-text-color, #ffffff);
+            --secondary-bg: var(--tg-theme-secondary-bg-color, #efeff4);
         }
         body { font-family: sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: var(--hint-color); }
         input, select { 
-            width: 100%; padding: 10px; border: 1px solid var(--hint-color); 
-            border-radius: 8px; background: var(--bg-color); color: var(--text-color);
-            box-sizing: border-box;
+            width: 100%; padding: 12px; border: 1px solid var(--hint-color); 
+            border-radius: 10px; background: var(--bg-color); color: var(--text-color);
+            box-sizing: border-box; font-size: 16px;
         }
         .row { display: flex; gap: 10px; }
         .row > div { flex: 1; }
         button#order-btn { 
-            width: 100%; padding: 15px; background: var(--btn-color); 
-            color: var(--btn-text); border: none; border-radius: 10px; 
-            font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px;
+            width: 100%; padding: 16px; background: var(--btn-color); 
+            color: var(--btn-text); border: none; border-radius: 12px; 
+            font-size: 17px; font-weight: bold; cursor: pointer; margin-top: 20px;
         }
+        h3 { margin-top: 0; text-align: center; }
     </style>
 </head>
 <body>
-    <h3 id="ui-title">Трансфер Валенсия</h3>
+    <h3 id="ui-title">Ideal Transfer Valencia</h3>
     
     <div class="form-group">
         <label id="lbl-pickup">Откуда</label>
-        <input type="text" id="pickup">
+        <input type="text" id="pickup" placeholder="...">
     </div>
 
     <div class="form-group">
         <label id="lbl-dest">Куда</label>
-        <input type="text" id="destination">
+        <input type="text" id="destination" placeholder="...">
     </div>
 
     <div class="row">
@@ -55,13 +57,13 @@
 
     <div class="form-group">
         <label id="lbl-flight">Номер рейса</label>
-        <input type="text" id="flight">
+        <input type="text" id="flight" placeholder="Ex: FR2044">
     </div>
 
     <div class="row">
         <div class="form-group">
             <label id="lbl-pass">Люди (взр/дет)</label>
-            <input type="text" id="passengers">
+            <input type="text" id="passengers" placeholder="2/1">
         </div>
         <div class="form-group">
             <label id="lbl-luggage">Багаж</label>
@@ -80,41 +82,54 @@
         </select>
     </div>
 
-    <div class="form-group">
-        <label id="lbl-contact">Имя и Телефон</label>
-        <input type="text" id="contact">
+    <div class="row">
+        <div class="form-group">
+            <label id="lbl-name">Имя</label>
+            <input type="text" id="user_name" placeholder="">
+        </div>
+        <div class="form-group">
+            <label id="lbl-phone">Телефон</label>
+            <input type="tel" id="user_phone" placeholder="+34...">
+        </div>
     </div>
 
-    <button id="order-btn">Заказать</button>
+    <button id="order-btn">Забронировать</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.ready();
 
         // СЛОВАРЬ ПЕРЕВОДОВ
         const translations = {
             ru: {
-                title: "Трансфер Валенсия", pickup: "Откуда", dest: "Куда", date: "Дата", time: "Время",
-                flight: "Номер рейса", pass: "Люди (взр/дет)", luggage: "Багаж", pay: "Оплата",
-                contact: "Имя и Телефон", order: "Забронировать", cash: "Наличные", card: "Картой"
+                title: "Трансфер Валенсия", pickup: "Откуда (Адрес или точка)", dest: "Куда", 
+                date: "Дата", time: "Время", flight: "Номер рейса (VLC)", 
+                pass: "Пассажиры (взр/дет)", luggage: "Чемоданы", pay: "Способ оплаты",
+                name: "Имя", phone: "Телефон", order: "Забронировать",
+                cash: "Наличные", card: "Картой (ссылка)"
             },
             es: {
-                title: "Traslado Valencia", pickup: "Origen", dest: "Destino", date: "Fecha", time: "Hora",
-                flight: "Nº de vuelo", pass: "Pasajeros", luggage: "Equipaje", pay: "Pago",
-                contact: "Nombre и Teléfono", order: "Reservar", cash: "Efectivo", card: "Tarjeta"
+                title: "Traslado Valencia", pickup: "Origen (Dirección o punto)", dest: "Destino", 
+                date: "Fecha", time: "Hora", flight: "Nº de vuelo (VLC)", 
+                pass: "Pasajeros", luggage: "Equipaje", pay: "Método de pago",
+                name: "Nombre", phone: "Teléfono", order: "Reservar ahora",
+                cash: "Efectivo", card: "Tarjeta (enlace)"
             },
             en: {
-                title: "Valencia Transfer", pickup: "From", dest: "To", date: "Date", time: "Time",
-                flight: "Flight number", pass: "Passengers", luggage: "Luggage", pay: "Payment",
-                contact: "Name and Phone", order: "Book Now", cash: "Cash", card: "By card"
+                title: "Valencia Transfer", pickup: "Pickup (Address or point)", dest: "Destination", 
+                date: "Date", time: "Time", flight: "Flight number (VLC)", 
+                pass: "Passengers", luggage: "Luggage", pay: "Payment method",
+                name: "Name", phone: "Phone", order: "Book Now",
+                cash: "Cash", card: "By card (link)"
             }
         };
 
-        // ОПРЕДЕЛЕНИЕ ЯЗЫКА
-        const userLang = tg.initDataUnsafe.user.language_code || 'en';
-        const lang = translations[userLang] || translations.en;
+        // ОПРЕДЕЛЕНИЕ ЯЗЫКА (по умолчанию испанский для Валенсии)
+        const userLang = tg.initDataUnsafe.user.language_code || 'es';
+        const lang = translations[userLang] || translations.es;
 
-        // ПРИМЕНЕНИЕ ПЕРЕВОДОВ
+        // ПРИМЕНЕНИЕ ПЕРЕВОДОВ К ИНТЕРФЕЙСУ
         document.getElementById('ui-title').innerText = lang.title;
         document.getElementById('lbl-pickup').innerText = lang.pickup;
         document.getElementById('lbl-dest').innerText = lang.dest;
@@ -124,12 +139,13 @@
         document.getElementById('lbl-pass').innerText = lang.pass;
         document.getElementById('lbl-luggage').innerText = lang.luggage;
         document.getElementById('lbl-pay').innerText = lang.pay;
-        document.getElementById('lbl-contact').innerText = lang.contact;
+        document.getElementById('lbl-name').innerText = lang.name;
+        document.getElementById('lbl-phone').innerText = lang.phone;
         document.getElementById('order-btn').innerText = lang.order;
         document.getElementById('opt-cash').innerText = lang.cash;
         document.getElementById('opt-card').innerText = lang.card;
 
-        // ОТПРАВКА ДАННЫХ
+        // ЛОГИКА ОТПРАВКИ
         document.getElementById('order-btn').addEventListener('click', () => {
             const data = {
                 pickup: document.getElementById('pickup').value,
@@ -140,8 +156,17 @@
                 passengers: document.getElementById('passengers').value,
                 luggage: document.getElementById('luggage').value,
                 payment: document.getElementById('payment').value,
-                contact: document.getElementById('contact').value
+                name: document.getElementById('user_name').value,
+                phone: document.getElementById('user_phone').value
             };
+
+            // Простая валидация
+            if(!data.pickup || !data.user_phone || !data.user_name) {
+                tg.showAlert("Пожалуйста, заполните имя, телефон и место подачи.");
+                return;
+            }
+
+            // Отправка данных боту
             tg.sendData(JSON.stringify(data));
         });
     </script>
