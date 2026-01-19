@@ -11,7 +11,6 @@
             --hint-color: var(--tg-theme-hint-color, #999999);
             --btn-color: var(--tg-theme-button-color, #248bed);
             --btn-text: var(--tg-theme-button-text-color, #ffffff);
-            --secondary-bg: var(--tg-theme-secondary-bg-color, #efeff4);
         }
         body { font-family: sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
         .form-group { margin-bottom: 15px; }
@@ -21,8 +20,8 @@
             border-radius: 10px; background: var(--bg-color); color: var(--text-color);
             box-sizing: border-box; font-size: 16px;
         }
-        .row { display: flex; gap: 10px; }
-        .row > div { flex: 1; }
+        .row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .row > div { flex: 1; min-width: 140px; }
         button#order-btn { 
             width: 100%; padding: 16px; background: var(--btn-color); 
             color: var(--btn-text); border: none; border-radius: 12px; 
@@ -34,14 +33,14 @@
 <body>
     <h3 id="ui-title">Your ideal transfer in Valencia</h3>
     
-   <div class="form-group">
-        <label>Откуда (адрес или точка)</label>
-        <input type="text" id="pickup" placeholder="Ex: Aeropuerto de Valencia / Address">
+    <div class="form-group">
+        <label id="lbl-pickup">Откуда</label>
+        <input type="text" id="pickup" placeholder="Ex: Aeropuerto de Valencia">
     </div>
 
-   <div class="form-group">
-        <label>Куда</label>
-        <input type="text" id="destination" placeholder="Ex: Hotel Las Arenas / Address">
+    <div class="form-group">
+        <label id="lbl-dest">Куда</label>
+        <input type="text" id="destination" placeholder="Ex: Hotel Las Arenas">
     </div>
 
     <div class="row">
@@ -56,11 +55,11 @@
     </div>
 
     <div class="form-group">
-        <label id="lbl-flight">Номер рейса (если из аэропорта)</label>
+        <label id="lbl-flight">Номер рейса</label>
         <input type="text" id="flight" placeholder="Ex: FR2044">
     </div>
 
-   <div class="row">
+    <div class="row">
         <div class="form-group">
             <label id="lbl-adults">Взрослые</label>
             <input type="number" id="adults" value="1">
@@ -70,7 +69,7 @@
             <input type="number" id="booster" value="0">
         </div>
         <div class="form-group">
-            <label id="lbl-child-seat">Детское кресло (до 125см)</label>
+            <label id="lbl-child-seat">Кресло (до 125см)</label>
             <input type="number" id="child_seat" value="0">
         </div>
         <div class="form-group">
@@ -83,11 +82,11 @@
         <label id="lbl-pay">Оплата</label>
         <select id="payment">
             <option value="cash" id="opt-cash">Наличные</option>
-            <option value="card" id="opt-card">Visa/MasterCard</option>
+            <option value="card">Visa/MasterCard</option>
             <option value="paypal">PayPal</option>
             <option value="wise">Wise</option>
             <option value="sepa">SEPA transfer</option>
-            <option value="usdt">USDT</option>
+            <option value="usdt">USDT (Crypto)</option>
         </select>
     </div>
 
@@ -107,57 +106,50 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
 
-        // СЛОВАРЬ ПЕРЕВОДОВ
         const translations = {
             ru: {
                 title: "Ваш идеальный трансфер в Валенсии", pickup: "Откуда (адрес или точка)", dest: "Куда", 
-                date: "Дата", time: "Время", flight: "Номер рейса", 
-                pass: "Пассажиры (взрослые)", pass: Дети "(бустер, до 135 см)", pass: Дети "(кресло, до 125 см)" 
-                luggage: "Чемоданы", pay: "Способ оплаты",
-                name: "Имя", phone: "Телефон", order: "Забронировать поездку",
-                cash: "Наличные"
+                date: "Дата", time: "Время", flight: "Номер рейса (если из аэропорта)", 
+                adults: "Взрослые", booster: "Дети (бустер)", child_seat: "Дети (кресло)",
+                luggage: "Багаж (чемоданы)", pay: "Оплата", name: "Имя", phone: "Телефон/WhatsApp", 
+                order: "Забронировать поездку", cash: "Наличные"
             },
             es: {
-                title: "Your ideal transfer in Valencia", pickup: "Origen (Dirección o punto)", dest: "Destino", 
+                title: "Tu traslado ideal en Valencia", pickup: "Origen (dirección o punto)", dest: "Destino", 
                 date: "Fecha", time: "Hora", flight: "Número de vuelo", 
-                pass: "Pasajeros (adultos)", pass: Niños "(booster, hasta 135 cm)", pass: Niños "(silla, hasta 125 cm)"
-                luggage: "Equipaje (maleteras)", pay: "Método de pago",
-                name: "Nombre", phone: "Teléfono", order: "Reservar ahora",
-                cash: "Efectivo"
+                adults: "Adultos", booster: "Niños (booster)", child_seat: "Niños (silla)",
+                luggage: "Equipaje", pay: "Pago", name: "Nombre", phone: "Teléfono/WhatsApp", 
+                order: "Reservar viaje", cash: "Efectivo"
             },
             en: {
-                title: "Your ideal transfer in Valencia", pickup: "Pickup (Address or point)", dest: "Destination", 
+                title: "Your ideal transfer in Valencia", pickup: "From (address or point)", dest: "To", 
                 date: "Date", time: "Time", flight: "Flight number", 
-                pass: "Passengers (adults)", pass: Children "(booster, hasta 135 cm)", pass: Children "(car seat, hasta 125 cm)"
-                luggage: "Luggage (bags)", pay: "Payment method",
-                name: "Name", phone: "Phone", order: "Book Transfer Now",
-                cash: "Cash"
+                adults: "Adults", booster: "Children (booster)", child_seat: "Children (car seat)",
+                luggage: "Luggage", pay: "Payment", name: "Name", phone: "Phone/WhatsApp", 
+                order: "Book a trip", cash: "Cash"
             }
         };
 
-        // ОПРЕДЕЛЕНИЕ ЯЗЫКА (по умолчанию русский)
         const userLang = tg.initDataUnsafe.user.language_code || 'ru';
         const lang = translations[userLang] || translations.ru;
 
-        // ПРИМЕНЕНИЕ ПЕРЕВОДОВ К ИНТЕРФЕЙСУ
         document.getElementById('ui-title').innerText = lang.title;
         document.getElementById('lbl-pickup').innerText = lang.pickup;
         document.getElementById('lbl-dest').innerText = lang.dest;
         document.getElementById('lbl-date').innerText = lang.date;
         document.getElementById('lbl-time').innerText = lang.time;
         document.getElementById('lbl-flight').innerText = lang.flight;
-        document.getElementById('lbl-pass').innerText = lang.pass;
+        document.getElementById('lbl-adults').innerText = lang.adults;
+        document.getElementById('lbl-booster').innerText = lang.booster;
+        document.getElementById('lbl-child-seat').innerText = lang.child_seat;
         document.getElementById('lbl-luggage').innerText = lang.luggage;
         document.getElementById('lbl-pay').innerText = lang.pay;
         document.getElementById('lbl-name').innerText = lang.name;
         document.getElementById('lbl-phone').innerText = lang.phone;
         document.getElementById('order-btn').innerText = lang.order;
         document.getElementById('opt-cash').innerText = lang.cash;
-        document.getElementById('opt-card').innerText = lang.card;
 
-        // ЛОГИКА ОТПРАВКИ
         document.getElementById('order-btn').addEventListener('click', () => {
             const data = {
                 pickup: document.getElementById('pickup').value,
@@ -165,20 +157,20 @@
                 date: document.getElementById('date').value,
                 time: document.getElementById('time').value,
                 flight: document.getElementById('flight').value,
-                passengers: document.getElementById('passengers').value,
+                adults: document.getElementById('adults').value,
+                booster: document.getElementById('booster').value,
+                child_seat: document.getElementById('child_seat').value,
                 luggage: document.getElementById('luggage').value,
                 payment: document.getElementById('payment').value,
                 name: document.getElementById('user_name').value,
                 phone: document.getElementById('user_phone').value
             };
 
-            // Простая валидация
-            if(!data.pickup || !data.user_phone || !data.user_name) {
-                tg.showAlert("Пожалуйста, заполните имя, телефон и место подачи.");
+            if(!data.pickup || !data.phone || !data.name) {
+                tg.showAlert("Пожалуйста, заполните Имя, Телефон и Место подачи.");
                 return;
             }
 
-            // Отправка данных боту
             tg.sendData(JSON.stringify(data));
         });
     </script>
