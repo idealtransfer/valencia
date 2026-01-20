@@ -90,6 +90,11 @@
         </select>
     </div>
 
+    <div class="form-group">
+        <label id="lbl-comments">Особые пожелания</label>
+        <textarea id="comments" rows="3" placeholder="Ex: Pet, child age, etc."></textarea>
+    </div>
+
     <div class="row">
         <div class="form-group">
             <label id="lbl-name">Имя</label>
@@ -115,7 +120,7 @@
                 title: "Ваш идеальный трансфер в Валенсии", pickup: "Откуда (адрес или точка)", dest: "Куда", 
                 date: "Дата", time: "Время", flight: "Номер рейса (если из аэропорта)", 
                 adults: "Взрослые", booster: "Дети до 135 см (бустер)", child_seat: "Дети до 125 см (автокресло)",
-                luggage: "Багаж (чемоданы)", pay: "Оплата", name: "Имя", phone: "Telegram/WhatsApp", 
+                luggage: "Багаж (чемоданы)", pay: "Оплата", comments: "Особые пожелания", name: "Имя", phone: "Telegram/WhatsApp", 
                 order: "Забронировать поездку", cash: "Наличные"
                 notice: "После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки.",
                 error: "Пожалуйста, заполните все обязательные поля" // Новая строка
@@ -124,7 +129,7 @@
                 title: "Your ideal transfer in Valencia", pickup: "Origen (dirección o punto)", dest: "Destino", 
                 date: "Fecha", time: "Hora", flight: "Número de vuelo", 
                 adults: "Adultos", booster: "Niños hasta 135 cm (booster)", child_seat: "Niños hasta 125 cm (silla)",
-                luggage: "Equipaje", pay: "Pago", name: "Nombre", phone: "Telegram/WhatsApp", 
+                luggage: "Equipaje", pay: "Pago", comments: "Peticiones especiales", name: "Nombre", phone: "Telegram/WhatsApp", 
                 order: "Reservar viaje", cash: "Efectivo"
                 notice: "Tras la reserva, nos pondremos en contacto contigo lo antes posible para confirmar los detalles y el precio. El pago se realiza al finalizar el viaje."
                 error: "Por favor, rellene todos los campos obligatorios" // Новая строка
@@ -133,7 +138,7 @@
                 title: "Your ideal transfer in Valencia", pickup: "From (address or point)", dest: "To", 
                 date: "Date", time: "Time", flight: "Flight number", 
                 adults: "Adults", booster: "Children up to 135 cm (booster)", child_seat: "Children up to 125 cm (car seat)",
-                luggage: "Luggage", pay: "Payment", name: "Name", phone: "Telegram/WhatsApp", 
+                luggage: "Luggage", pay: "Payment", comments: "Special requests", name: "Name", phone: "Telegram/WhatsApp", 
                 order: "Book Transfer Now", cash: "Cash"
                 notice: "After booking, we will contact you shortly to clarify the details and the cost. Payment is made at the end of the trip."
                 error: "Please fill in all required fields" // Новая строка
@@ -155,6 +160,7 @@
         document.getElementById('lbl-child-seat').innerText = lang.child_seat;
         document.getElementById('lbl-luggage').innerText = lang.luggage;
         document.getElementById('lbl-pay').innerText = lang.pay;
+        document.getElementById('lbl-comments').innerText = lang.comments;
         document.getElementById('lbl-name').innerText = lang.name;
         document.getElementById('lbl-phone').innerText = lang.phone;
         document.getElementById('order-btn').innerText = lang.order;
@@ -172,12 +178,13 @@
                 child_seat: document.getElementById('child_seat').value,
                 luggage: document.getElementById('luggage').value,
                 payment: document.getElementById('payment').value,
+                comments: document.getElementById('comments').value,
                 name: document.getElementById('user_name').value,
                 phone: document.getElementById('user_phone').value
             };
 
            // ПРОВЕРКА ОБЯЗАТЕЛЬНЫХ ПОЛЕЙ
-            if(!data.pickup || !data.destination || !data.date || !data.adults || !data.name || !data.phone) {
+            if(!data.pickup || !data.destination || !data.date || !data.time || !data.adults || !data.name || !data.phone) {
                 tg.showAlert(lang.error);
                 return;
             }
