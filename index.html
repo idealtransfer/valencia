@@ -106,13 +106,12 @@
         </div>
     </div>
     <div class="form-group">
-        <label id="lbl-pay">Способ связи</label>
-        <select id="connect">
-            <option value="telegram">Telegram</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="phone">Телефон</option>
-        </select>
-    </div>
+    <label id="lbl-contact-method">Способ связи</label>
+    <select id="contact_method">
+        <option value="Telegram" id="opt-tg">Telegram</option>
+        <option value="WhatsApp" id="opt-wa">WhatsApp</option>
+    </select>
+</div>
 
     <p id="ui-notice" style="font-size: 12px; color: var(--hint-color); text-align: center; margin-top: 20px;">
     После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки.
@@ -129,8 +128,9 @@
                 date: "Дата", time: "Время", flight: "Номер рейса (если из аэропорта)", 
                 adults: "Взрослые", booster: "Дети до 135 см (бустер)", child_seat: "Дети до 125 см (автокресло)",
                 luggage: "Багаж (чемоданы)", pay: "Оплата", comments: "Особые пожелания", name: "Имя", phone: "Telegram/WhatsApp", 
-                order: "Забронировать поездку", cash: "Наличные"
+                order: "Забронировать поездку", cash: "Наличные",
                 notice: "После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки.",
+                contact_method: "Предпочтительный способ связи",
                 error: "Пожалуйста, заполните все обязательные поля" // Новая строка
             },
             es: {
@@ -138,8 +138,9 @@
                 date: "Fecha", time: "Hora", flight: "Número de vuelo (si del aeropuerto)", 
                 adults: "Adultos", booster: "Niños hasta 135 cm (booster)", child_seat: "Niños hasta 125 cm (silla)",
                 luggage: "Equipaje", pay: "Pago", comments: "Peticiones especiales", name: "Nombre", phone: "Telegram/WhatsApp", 
-                order: "Reservar viaje", cash: "Efectivo"
+                order: "Reservar viaje", cash: "Efectivo",
                 notice: "Tras la reserva, nos pondremos en contacto contigo lo antes posible para confirmar los detalles y el precio. El pago se realiza al finalizar el viaje."
+                contact_method: "Método de contacto preferido",
                 error: "Por favor, rellene todos los campos obligatorios" // Новая строка
             },
             en: {
@@ -149,6 +150,7 @@
                 luggage: "Luggage", pay: "Payment", comments: "Special requests", name: "Name", phone: "Telegram/WhatsApp", 
                 order: "Book Transfer Now", cash: "Cash"
                 notice: "After booking, we will contact you shortly to clarify the details and the cost. Payment is made at the end of the trip."
+                contact_method: "Preferred contact method"
                 error: "Please fill in all required fields" // Новая строка
             }
         };
@@ -173,6 +175,7 @@
         document.getElementById('lbl-phone').innerText = lang.phone;
         document.getElementById('order-btn').innerText = lang.order;
         document.getElementById('opt-cash').innerText = lang.cash;
+        document.getElementById('lbl-contact-method').innerText = lang.contact_method;
 
         document.getElementById('order-btn').addEventListener('click', () => {
             const data = {
@@ -189,6 +192,7 @@
                 comments: document.getElementById('comments').value,
                 name: document.getElementById('user_name').value,
                 phone: document.getElementById('user_phone').value
+                contact_method: document.getElementById('contact_method').value,
                 language: userLang
             };
 
