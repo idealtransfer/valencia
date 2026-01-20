@@ -176,8 +176,9 @@
                 phone: document.getElementById('user_phone').value
             };
 
-            if(!data.pickup || !data.phone || !data.name) {
-                tg.showAlert("Пожалуйста, заполните все обязательные поля");
+           // ПРОВЕРКА ОБЯЗАТЕЛЬНЫХ ПОЛЕЙ
+            if(!data.pickup || !data.destination || !data.date || !data.adults || !data.name || !data.phone) {
+                tg.showAlert(lang.error);
                 return;
             }
 
