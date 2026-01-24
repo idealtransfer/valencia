@@ -5,8 +5,9 @@ import asyncio
 from aiohttp import web
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
+from aiogram.types import ReplyKeyboardRemove, WebAppInfo # <-- Вот этот импорт был нужен!
 
+# Настройка логов
 logging.basicConfig(level=logging.INFO)
 
 # --- ВАШИ ПЕРЕМЕННЫЕ ---
@@ -19,29 +20,27 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 routes = web.RouteTableDef()
 
-# 1. ОТДАЕМ САЙТ (index.html)
+# 1. ОТДАЕМ САЙТ
 @routes.get('/')
 async def index_handler(request):
     try:
         with open('index.html', 'r', encoding='utf-8') as f:
             return web.Response(text=f.read(), content_type='text/html')
     except Exception:
-        return web.Response(text="<h1>Сайт работает!</h1><p>Но файл index.html не найден.</p>", content_type='text/html')
+        return web.Response(text="<h1>Сайт работает</h1>", content_type='text/html')
 
-# --- ОБНОВЛЕННЫЙ ОБРАБОТЧИК /start ---
+# 2. КОМАНДА /START (Без кнопки, просто текст)
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    # Мы убираем ReplyKeyboardMarkup и ReplyKeyboardRemove, чтобы очистить старые кнопки
-    from aiogram.types import ReplyKeyboardRemove
-    
+    # ReplyKeyboardRemove() удалит старые кнопки, если они остались
     await message.answer(
-        "Привет! Я готов к работе. 🚕\n\n"
-        "Чтобы заказать трансфер, нажмите на синюю кнопку <b>«Меню»</b> (или «Заказать») в левом нижнем углу.",
+        "👋 Привет! Я бот для заказа трансфера.\n\n"
+        "Чтобы оформить заказ, нажмите на синюю кнопку <b>«Меню»</b> (или «Заказать») слева от поля ввода текста.",
         parse_mode="HTML",
-        reply_markup=ReplyKeyboardRemove() # Эта строчка удалит кнопки из чата, если они там зависли
+        reply_markup=ReplyKeyboardRemove() 
     )
 
-# 3. ЛОВИМ ДАННЫЕ (Самое важное!)
+# 3. ЛОВИМ ДАННЫЕ (На случай, если Telegram позволит их прислать)
 @dp.message(F.web_app_data)
 async def web_app_data_handler(message: types.Message):
     try:
@@ -49,29 +48,38 @@ async def web_app_data_handler(message: types.Message):
         
         text = (
             f"✅ <b>НОВЫЙ ЗАКАЗ!</b>\n"
-            f"👤 <b>Кто:</b> {data.get('name')}\n"
+            f"👤 <b>Имя:</b> {data.get('name')}\n"
             f"📞 <b>Тел:</b> {data.get('phone')} ({data.get('contact_method')})\n"
-            f"🚗 <b>Маршрут:</b> {data.get('pickup')} -> {data.get('destination')}\n"
-            f"📅 <b>Когда:</b> {data.get('date')} {data.get('time')}"
+            f"🛫 <b>Откуда:</b> {data.get('pickup')}\n"
+            f"🏨 <b>Куда:</b> {data.get('destination')}\n"
+            f"📅 <b>Дата:</b> {data.get('date')} {data.get('time')}\n"
+            f"💰 <b>Оплата:</b> {data.get('payment')}\n"
+            f"✈️ <b>Рейс:</b> {data.get('flight')}\n"
+            f"🧳 <b>Багаж:</b> {data.get('luggage')}\n"
+            f"👶 <b>Дети:</b> Бустер: {data.get('booster')}, Кресло: {data.get('child_seat')}\n"
+            f"📝 <b>Коммент:</b> {data.get('comments')}"
         )
         
-        await message.answer("Супер! Данные получены. Мы свяжемся с вами.")
+        # Если данные пришли через sendData - отвечаем
+        await message.answer("✅ Заявка принята! Мы скоро свяжемся с вами.")
         if ADMIN_ID:
             await bot.send_message(chat_id=ADMIN_ID, text=text, parse_mode="HTML")
             
     except Exception as e:
-        await message.answer(f"Ошибка данных: {e}")
+        logging.error(f"Error handling data: {e}")
 
+# ЗАПУСК
 async def main():
-    # Запуск сайта на порту 80
+    # Сайт
     app = web.Application()
     app.add_routes(routes)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 80)
     await site.start()
+    logging.info("Site started on port 80")
 
-    # Запуск бота
+    # Бот
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
