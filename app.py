@@ -1,89 +1,75 @@
-import asyncio
-import json
 import os
+import json
+import logging
 from aiogram import Bot, Dispatcher, types, F
-from aiogram.filters import CommandStart
-from aiogram.types import WebAppInfo
+from aiogram.filters import Command
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 
-# Получаем настройки из системы
-API_TOKEN = os.getenv('BOT_TOKEN')
-ADMIN_ID = os.getenv('ADMIN_ID') 
+# Настройка логов, чтобы видеть ошибки в Amvera
+logging.basicConfig(level=logging.INFO)
 
-bot = Bot(token=API_TOKEN)
+# Получаем переменные
+TOKEN = os.getenv('BOT_TOKEN')
+ADMIN_ID = os.getenv('ADMIN_ID')
+
+# Создаем бота
+bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Словарь для ответов самого бота (после отправки формы)
-responses = {
-    'ru': "✅ Спасибо! Ваш заказ принят. Мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости.",
-    'es': "✅ ¡Gracias! Su pedido ha sido recibido. Nos pondremos en contacto con usted pronto para confirmar los detalles y el precio.",
-    'en': "✅ Thank you! Your order has been received. We will contact you shortly to clarify details and cost."
-}
+# --- 1. Обработчик команды /start ---
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    # ВАЖНО: Замените ссылку ниже на ВАШУ ссылку приложения из Amvera!
+    # Вы найдете её на главной странице проекта в Amvera (вида https://xxx.amvera.io)
+    # Обязательно добавьте /index.html в конце, если нужно, или просто домен.
+    # Пока что я ставлю заглушку, ВАМ НУЖНО ЕЁ ПОМЕНЯТЬ.
+    WEBAPP_URL = "https://idealtransfer-idealtransfer.amvera.io" 
 
-@dp.message(CommandStart())
-async def start(message: types.Message):
-    # Текст кнопки на разных языках
-    btn_text = "Заказать трансфер 🚗"
-    if message.from_user.language_code == 'es':
-        btn_text = "Reservar traslado 🚗"
-    elif message.from_user.language_code == 'en':
-        btn_text = "Book Transfer 🚗"
+    kb = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="🚖 Заказать трансфер", web_app=WebAppInfo(url=WEBAPP_URL))]
+    ], resize_keyboard=True)
 
-    markup = types.ReplyKeyboardMarkup(
-        keyboard=[
-            [types.KeyboardButton(
-                text=btn_text, 
-                web_app=WebAppInfo(url="https://idealtransfer.github.io/valencia/")) # Ссылка на ваш GitHub
-            ]
-        ],
-        resize_keyboard=True
+    await message.answer(
+        "Привет! Я бот для заказа трансфера в Валенсии.\n"
+        "Нажми на кнопку ниже, чтобы открыть форму заказа 👇",
+        reply_markup=kb
     )
-    await message.answer("¡Hola! Нажмите на кнопку ниже, чтобы оформить заявку на трансфер в Валенсии.", reply_markup=markup)
 
+# --- 2. Самая главная часть: Ловим данные из WebApp ---
 @dp.message(F.web_app_data)
-async def handle_order(message: types.Message):
-    # Читаем данные из формы
+async def web_app_data_handler(message: types.Message):
+    # Получаем данные в виде строки JSON
+    data_str = message.web_app_data.data
+    
     try:
-        data = json.loads(message.web_app_data.data)
-    except Exception:
-        await message.answer("Ошибка при обработке данных.")
-        return
+        # Превращаем строку обратно в словарь
+        data = json.loads(data_str)
+        
+        # Формируем красивый текст заказа
+        text = (
+            f"🚖 <b>НОВЫЙ ЗАКАЗ!</b>\n\n"
+            f"👤 <b>Имя:</b> {data.get('name')}\n"
+            f"📞 <b>Телефон:</b> {data.get('phone')}\n"
+            f"🛫 <b>Откуда:</b> {data.get('pickup')}\n"
+            f"🏨 <b>Куда:</b> {data.get('destination')}\n"
+            f"📅 <b>Дата:</b> {data.get('date')} в {data.get('time')}\n"
+            f"💬 <b>Связь через:</b> {data.get('contact_method')}\n"
+        )
+        
+        # 1. Отправляем подтверждение пользователю (в чат)
+        await message.answer(f"✅ Спасибо, {data.get('name')}! Ваш заказ принят.\nМы свяжемся с вами в ближайшее время.")
 
-    user = message.from_user
-    lang = data.get('language', 'ru')
-    tg_profile = f"tg://user?id={user.id}"
-    
-    # Формируем отчет для администратора
-    report = (
-        f"🆕 *НОВЫЙ ЗАКАЗ (Язык: {lang})*\n"
-        f"━━━━━━━━━━━━━━━\n"
-        f"📍 *Откуда:* {data.get('pickup')}\n"
-        f"🏁 *Куда:* {data.get('destination')}\n"
-        f"📅 *Дата:* {data.get('date')} | ⏰ {data.get('time')}\n"
-        f"✈️ *Рейс:* {data.get('flight') or '—'}\n\n"
-        f"👥 *Пассажиры:*\n"
-        f"• Взрослые: {data.get('adults') or 1}\n"
-        f"• Бустеры: {data.get('booster') or 0}\n"
-        f"• Кресла: {data.get('child_seat') or 0}\n"
-        f"🧳 *Багаж:* {data.get('luggage') or 0} шт.\n\n"
-        f"💳 *Оплата:* {data.get('payment', '').upper()}\n"
-        f"📝 *Пожелания:* {data.get('comments') or '—'}\n"
-        f"━━━━━━━━━━━━━━━\n"
-        f"👤 *Имя:* {data.get('name')}\n"
-        f"📱 *Тел:* {data.get('phone')}\n"
-        f"💬 *Связь через:* {data.get('contact_method')}\n"
-        f"━━━━━━━━━━━━━━━\n"
-        f"🔗 [ПРОФИЛЬ ЗАКАЗЧИКА]({tg_profile})"
-    )
-    
-    # Отвечаем пользователю на его языке
-    thanks_text = responses.get(lang, responses['ru'])
-    await message.answer(thanks_text)
-    
-    # Отправляем уведомление вам
-    await bot.send_message(ADMIN_ID, report, parse_mode="Markdown")
+        # 2. Отправляем уведомление АДМИНУ (Вам)
+        if ADMIN_ID:
+            await bot.send_message(chat_id=ADMIN_ID, text=text, parse_mode="HTML")
+            
+    except Exception as e:
+        await message.answer(f"Ошибка чтения данных: {e}")
 
+# Запуск бота
 async def main():
     await dp.start_polling(bot)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())
