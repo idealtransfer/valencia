@@ -3,95 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transfer Valencia</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; }
-        .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h3 { text-align: center; margin-top: 0; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button#order-btn {
-            background-color: #248bed; color: white; border: none;
-            padding: 16px; font-size: 18px; border-radius: 12px;
-            cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold;
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #ffffff);
+            --text-color: var(--tg-theme-text-color, #000000);
+            --hint-color: var(--tg-theme-hint-color, #999999);
+            --btn-color: var(--tg-theme-button-color, #248bed);
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
         }
-        /* Стили для экрана успеха */
-        #success-screen { text-align: center; padding: 40px 20px; }
-        .hidden { display: none; }
+        body { font-family: sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: var(--hint-color); }
+        input, select { 
+            width: 100%; padding: 12px; border: 1px solid var(--hint-color); 
+            border-radius: 10px; background: var(--bg-color); color: var(--text-color);
+            box-sizing: border-box; font-size: 16px;
+        }
+        .row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .row > div { flex: 1; min-width: 140px; }
+        button#order-btn { 
+            width: 100%; padding: 16px; background: var(--btn-color); 
+            color: var(--btn-text); border: none; border-radius: 12px; 
+            font-size: 17px; font-weight: bold; cursor: pointer; margin-top: 20px;
+        }
+        h3 { margin-top: 0; text-align: center; }
     </style>
 </head>
 <body>
+    <h3 id="ui-title">Ваш идеальный трансфер в Валенсии</h3>
+    
+    <div class="form-group">
+        <label id="lbl-pickup">Откуда (адрес или точка)</label>
+        <input type="text" id="pickup" placeholder="Ex: Aeropuerto de Valencia / Address">
+    </div>
 
-    <div id="form-container" class="container">
-        <h3>Заказ трансфера</h3>
-        
-        <label>Ваше имя</label>
-        <input type="text" id="user_name" placeholder="Иван">
+    <div class="form-group">
+        <label id="lbl-dest">Куда</label>
+        <input type="text" id="destination" placeholder="Ex: Hotel Las Arenas / Address">
+    </div>
 
-        <label>Телефон</label>
-        <input type="tel" id="user_phone" value="+34">
-
-        <label>Откуда</label>
-        <input type="text" id="pickup" placeholder="Аэропорт / Адрес">
-
-        <label>Куда</label>
-        <input type="text" id="destination" placeholder="Отель / Адрес">
-
-        <div style="display: flex; gap: 10px;">
-            <div style="flex: 1;"><label>Дата</label><input type="date" id="date"></div>
-            <div style="flex: 1;"><label>Время</label><input type="time" id="time"></div>
+    <div class="row">
+        <div class="form-group">
+            <label id="lbl-date">Дата</label>
+            <input type="date" id="date">
         </div>
+        <div class="form-group">
+            <label id="lbl-time">Время</label>
+            <input type="time" id="time">
+        </div>
+    </div>
 
-        <label>Способ связи</label>
-        <select id="contact_method">
-            <option value="Telegram">Telegram</option>
-            <option value="WhatsApp">WhatsApp</option>
+    <div class="form-group">
+        <label id="lbl-flight">Номер рейса (если из аэропорта)</label>
+        <input type="text" id="flight" placeholder="Ex: FR2044">
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label id="lbl-adults">Взрослые</label>
+            <input type="number" id="adults" placeholder="1">
+        </div>
+        <div class="form-group">
+            <label id="lbl-booster">Дети до 135 см (бустер)</label>
+            <input type="number" id="booster" placeholder="0">
+        </div>
+        <div class="form-group">
+            <label id="lbl-child-seat">Дети до 125 см (автокресло)</label>
+            <input type="number" id="child_seat" placeholder="0">
+        </div>
+        <div class="form-group">
+            <label id="lbl-luggage">Чемоданы</label>
+            <input type="number" id="luggage" placeholder="0">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label id="lbl-pay">Оплата</label>
+        <select id="payment">
+            <option value="cash" id="opt-cash">Наличные</option>
+            <option value="card">Visa/MasterCard</option>
+            <option value="paypal">PayPal</option>
+            <option value="bizum">Bizum</option>
+            <option value="wise">Wise</option>
+            <option value="sepa">SEPA transfer (IBAN)</option>
+            <option value="usdt">USDT (Crypto)</option>
         </select>
-
-        <button id="order-btn">ОТПРАВИТЬ ЗАЯВКУ</button>
     </div>
 
-    <div id="success-screen" class="hidden">
-        <div style="font-size: 60px;">✅</div>
-        <h2>Заявка отправлена!</h2>
-        <p>Мы получили ваши данные и скоро свяжемся с вами.</p>
-        <br>
-        <button onclick="Telegram.WebApp.close()" style="padding: 12px 24px; background: #ddd; border: none; border-radius: 8px;">Закрыть</button>
+    <div class="form-group">
+        <label id="lbl-comments">Особые пожелания</label>
+        <input type="comments" id="comments" placeholder="Ex: Pet, child age, etc.">
     </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label id="lbl-name">Имя</label>
+            <input type="text" id="user_name" placeholder="Ivan">
+        </div>
+        <div class="form-group">
+            <label id="lbl-phone">Telegram/WhatsApp</label>
+            <input type="tel" id="user_phone" value="+34">
+        </div>
+    </div>
+    <div class="form-group">
+        <label id="lbl-contact-method">Способ связи</label>
+        <select id="contact_method">
+            <option value="Telegram" id="opt-tg">Telegram</option>
+            <option value="WhatsApp" id="opt-wa">WhatsApp</option>
+        </select>
+    </div>
+
+    <p id="ui-notice" style="font-size: 12px; color: var(--hint-color); text-align: center; margin-top: 20px;">
+        После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки.
+        Если у вас возникли трудности, свяжитесь с админом @transfer_vlc
+    </p>
+    <button id="order-btn">Отправить заявку</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        document.getElementById('order-btn').addEventListener('click', function() {
-            // 1. Собираем данные
+        const translations = {
+            ru: {
+                title: "Ваш идеальный трансфер в Валенсии", pickup: "Откуда (адрес или точка)", dest: "Куда", 
+                date: "Дата", time: "Время", flight: "Номер рейса (если из аэропорта)", 
+                adults: "Взрослые", booster: "Дети до 135 см (бустер)", child_seat: "Дети до 125 см (автокресло)",
+                luggage: "Багаж (чемоданы)", pay: "Оплата", comments: "Особые пожелания", name: "Имя", phone: "Telegram/WhatsApp", 
+                order: "Отправить заявку", cash: "Наличные",
+                notice: "После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки.",
+                contact_method: "Предпочтительный способ связи",
+                error: "Пожалуйста, заполните все обязательные поля"
+            },
+            es: {
+                title: "Your ideal transfer in Valencia", pickup: "Origen (dirección o punto)", dest: "Destino", 
+                date: "Fecha", time: "Hora", flight: "Número de vuelo (si del aeropuerto)", 
+                adults: "Adultos", booster: "Niños hasta 135 cm (booster)", child_seat: "Niños hasta 125 cm (silla)",
+                luggage: "Equipaje", pay: "Pago", comments: "Peticiones especiales", name: "Nombre", phone: "Telegram/WhatsApp", 
+                order: "Enviar solicitud", cash: "Efectivo",
+                notice: "Tras la reserva, nos pondremos en contacto contigo lo antes posible para confirmar los detalles y el precio. El pago se realiza al finalizar el viaje. Si tienes alguna dificultad, póngase en contacto con el admin @transfer_vlc",
+                contact_method: "Método de contacto preferido",
+                error: "Por favor, rellene todos los campos obligatorios"
+            },
+            en: {
+                title: "Your ideal transfer in Valencia", pickup: "From (address or point)", dest: "To", 
+                date: "Date", time: "Time", flight: "Flight number (if from airport)", 
+                adults: "Adults", booster: "Children up to 135 cm (booster)", child_seat: "Children up to 125 cm (car seat)",
+                luggage: "Luggage", pay: "Payment", comments: "Special requests", name: "Name", phone: "Telegram/WhatsApp", 
+                order: "Send Request", cash: "Cash",
+                notice: "After booking, we will contact you shortly to clarify the details and the cost. Payment is made at the end of the trip. If you have any difficulties, please contact the admin @transfer_vlc",
+                contact_method: "Preferred contact method",
+                error: "Please fill in all required fields"
+            }
+        };
+
+        // Защита от ошибки, если user не определен
+        const userLang = (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code) || 'ru';
+        const lang = translations[userLang] || translations.ru;
+
+        document.getElementById('ui-title').innerText = lang.title;
+        document.getElementById('ui-notice').innerText = lang.notice;
+        document.getElementById('lbl-pickup').innerText = lang.pickup;
+        document.getElementById('lbl-dest').innerText = lang.dest;
+        document.getElementById('lbl-date').innerText = lang.date;
+        document.getElementById('lbl-time').innerText = lang.time;
+        document.getElementById('lbl-flight').innerText = lang.flight;
+        document.getElementById('lbl-adults').innerText = lang.adults;
+        document.getElementById('lbl-booster').innerText = lang.booster;
+        document.getElementById('lbl-child-seat').innerText = lang.child_seat;
+        document.getElementById('lbl-luggage').innerText = lang.luggage;
+        document.getElementById('lbl-pay').innerText = lang.pay;
+        document.getElementById('lbl-comments').innerText = lang.comments;
+        document.getElementById('lbl-name').innerText = lang.name;
+        document.getElementById('lbl-phone').innerText = lang.phone;
+        document.getElementById('order-btn').innerText = lang.order;
+        document.getElementById('opt-cash').innerText = lang.cash;
+        document.getElementById('lbl-contact-method').innerText = lang.contact_method;
+
+        document.getElementById('order-btn').addEventListener('click', () => {
             const data = {
-                name: document.getElementById('user_name').value,
-                phone: document.getElementById('user_phone').value,
                 pickup: document.getElementById('pickup').value,
                 destination: document.getElementById('destination').value,
                 date: document.getElementById('date').value,
                 time: document.getElementById('time').value,
-                contact_method: document.getElementById('contact_method').value
+                flight: document.getElementById('flight').value,
+                adults: document.getElementById('adults').value,
+                booster: document.getElementById('booster').value,
+                child_seat: document.getElementById('child_seat').value,
+                luggage: document.getElementById('luggage').value,
+                payment: document.getElementById('payment').value,
+                comments: document.getElementById('comments').value,
+                name: document.getElementById('user_name').value,
+                phone: document.getElementById('user_phone').value, // Здесь была пропущена запятая
+                contact_method: document.getElementById('contact_method').value,
+                language: userLang
             };
 
-            // 2. Простая валидация
-            if(!data.name || !data.pickup || !data.destination) {
-                tg.showAlert("Пожалуйста, заполните Имя, Откуда и Куда");
+           // ПРОВЕРКА ОБЯЗАТЕЛЬНЫХ ПОЛЕЙ
+            if(!data.pickup || !data.destination || !data.date || !data.time || !data.adults || !data.name || !data.phone) {
+                tg.showAlert(lang.error);
                 return;
             }
 
-            // 3. Отправляем данные в Telegram (Бот их поймает, если сервер работает)
-            try {
-                tg.sendData(JSON.stringify(data));
-            } catch (e) {
-                console.error(e); // Игнорируем ошибку отправки, чтобы показать успех
-            }
-
-            // 4. МГНОВЕННО показываем зеленый экран
-            document.getElementById('form-container').style.display = 'none';
-            document.getElementById('success-screen').style.display = 'block';
-            document.getElementById('success-screen').classList.remove('hidden');
+            // ОТПРАВКА ДАННЫХ
+            tg.sendData(JSON.stringify(data));
         });
     </script>
 </body>
