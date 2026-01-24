@@ -12,7 +12,6 @@
             --hint-color: var(--tg-theme-hint-color, #999999);
             --btn-color: var(--tg-theme-button-color, #248bed);
             --btn-text: var(--tg-theme-button-text-color, #ffffff);
-            --secondary-bg: var(--tg-theme-secondary-bg-color, #f0f0f0);
         }
         body { font-family: sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; line-height: 1.4; }
         .form-group { margin-bottom: 15px; }
@@ -117,6 +116,7 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // 1. СЛОВАРЬ ПЕРЕВОДОВ (Ничего не удалено)
         const translations = {
             ru: {
                 title: "Ваш идеальный трансфер в Валенсии", pickup: "Откуда (адрес или точка)", dest: "Куда", 
@@ -124,7 +124,7 @@
                 child_seat: "Автокресло (до 125см)", luggage: "Чемоданы", pay: "Способ оплаты", 
                 comments: "Особые пожелания", name: "Ваше имя", phone: "Телефон", contact: "Способ связи",
                 order: "Отправить заявку", cash: "Наличные (Cash)", success_t: "Заявка принята!",
-                success_p: "Мы свяжемся с вами в ближайшее время.", error: "Заполните обязательные поля",
+                success_p: "Мы свяжемся с вами в ближайшее время.", error: "Заполните обязательные поля: Откуда, Куда, Имя, Телефон",
                 notice: "После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки."
             },
             en: {
@@ -133,7 +133,7 @@
                 child_seat: "Car seat (up to 125cm)", luggage: "Luggage", pay: "Payment method", 
                 comments: "Special requests", name: "Name", phone: "Phone", contact: "Contact via",
                 order: "Send Request", cash: "Cash", success_t: "Order received!",
-                success_p: "We will contact you shortly.", error: "Please fill required fields",
+                success_p: "We will contact you shortly.", error: "Please fill required fields: From, To, Name, Phone",
                 notice: "After booking, we will contact you shortly to clarify the details and the cost. Payment is made at the end of the trip."
             },
             es: {
@@ -142,7 +142,7 @@
                 child_seat: "Silla (hasta 125cm)", luggage: "Maletas", pay: "Método de pago", 
                 comments: "Peticiones especiales", name: "Nombre", phone: "Teléfono", contact: "Contacto por",
                 order: "Enviar solicitud", cash: "Efectivo (Cash)", success_t: "¡Solicitud recibida!",
-                success_p: "Nos pondremos en contacto pronto.", error: "Por favor complete los campos",
+                success_p: "Nos pondremos en contacto pronto.", error: "Por favor complete los campos obligatorios",
                 notice: "Tras la reserva, nos pondremos en contacto contigo lo antes posible para confirmar los detalles y el precio. El pago se realiza al finalizar el viaje."
             }
         };
@@ -150,29 +150,35 @@
         const userLang = tg.initDataUnsafe?.user?.language_code || 'ru';
         const lang = translations[userLang] || translations.ru;
 
-        // Применяем тексты
-        document.getElementById('ui-title').innerText = lang.title;
-        document.getElementById('lbl-pickup').innerText = lang.pickup;
-        document.getElementById('lbl-dest').innerText = lang.dest;
-        document.getElementById('lbl-date').innerText = lang.date;
-        document.getElementById('lbl-time').innerText = lang.time;
-        document.getElementById('lbl-flight').innerText = lang.flight;
-        document.getElementById('lbl-adults').innerText = lang.adults;
-        document.getElementById('lbl-booster').innerText = lang.booster;
-        document.getElementById('lbl-child-seat').innerText = lang.child_seat;
-        document.getElementById('lbl-luggage').innerText = lang.luggage;
-        document.getElementById('lbl-pay').innerText = lang.pay;
-        document.getElementById('lbl-comments').innerText = lang.comments;
-        document.getElementById('lbl-name').innerText = lang.name;
-        document.getElementById('lbl-phone').innerText = lang.phone;
-        document.getElementById('lbl-contact').innerText = lang.contact;
-        document.getElementById('ui-notice').innerText = lang.notice;
-        document.getElementById('order-btn').innerText = lang.order;
-        document.getElementById('opt-cash').innerText = lang.cash;
-        document.getElementById('success-title').innerText = lang.success_t;
-        document.getElementById('success-text').innerText = lang.success_p;
+        // ПРИМЕНЕНИЕ ЯЗЫКА
+        try {
+            document.getElementById('ui-title').innerText = lang.title;
+            document.getElementById('lbl-pickup').innerText = lang.pickup;
+            document.getElementById('lbl-dest').innerText = lang.dest;
+            document.getElementById('lbl-date').innerText = lang.date;
+            document.getElementById('lbl-time').innerText = lang.time;
+            document.getElementById('lbl-flight').innerText = lang.flight;
+            document.getElementById('lbl-adults').innerText = lang.adults;
+            document.getElementById('lbl-booster').innerText = lang.booster;
+            document.getElementById('lbl-child-seat').innerText = lang.child_seat;
+            document.getElementById('lbl-luggage').innerText = lang.luggage;
+            document.getElementById('lbl-pay').innerText = lang.pay;
+            document.getElementById('lbl-comments').innerText = lang.comments;
+            document.getElementById('lbl-name').innerText = lang.name;
+            document.getElementById('lbl-phone').innerText = lang.phone;
+            document.getElementById('lbl-contact').innerText = lang.contact;
+            document.getElementById('ui-notice').innerText = lang.notice;
+            document.getElementById('order-btn').innerText = lang.order;
+            document.getElementById('opt-cash').innerText = lang.cash;
+            document.getElementById('success-title').innerText = lang.success_t;
+            document.getElementById('success-text').innerText = lang.success_p;
+        } catch (e) {
+            console.error("Ошибка перевода: ", e);
+        }
 
+        // 2. ОБРАБОТКА НАЖАТИЯ (Исправленная логика)
         document.getElementById('order-btn').addEventListener('click', function() {
+            // Собираем данные
             const data = {
                 pickup: document.getElementById('pickup').value,
                 destination: document.getElementById('destination').value,
@@ -191,38 +197,43 @@
                 user_id: tg.initDataUnsafe?.user?.id
             };
 
-            if(!data.pickup || !data.destination || !data.date || !data.time || !data.name || !data.phone) {
+            // Валидация
+            if(!data.pickup || !data.destination || !data.name || !data.phone) {
                 tg.showAlert(lang.error);
                 return;
             }
 
             const btn = document.getElementById('order-btn');
-            btn.innerText = "...";
+            btn.innerText = "⏳...";
             btn.disabled = true;
 
-// ОТПРАВКА НА СЕРВЕР
+            // Отправка (c подробным отчетом об ошибке)
             fetch('/submit_order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(async res => {
-                if(res.ok) {
+            .then(async response => {
+                if(response.ok) {
+                    // УСПЕХ
                     document.getElementById('form-container').style.display = 'none';
                     document.getElementById('success-screen').style.display = 'block';
                     tg.HapticFeedback.notificationOccurred('success');
                 } else {
-                    const errText = await res.text();
-                    tg.showAlert("Ошибка сервера: " + res.status + "\n" + errText);
+                    // ОШИБКА СЕРВЕРА (например 500)
+                    const errorText = await response.text();
+                    tg.showAlert("Ошибка сервера (" + response.status + "):\n" + errorText);
                     btn.innerText = lang.order;
                     btn.disabled = false;
                 }
             })
-            .catch(err => {
-                tg.showAlert("Ошибка сети: " + err.message);
+            .catch(error => {
+                // ОШИБКА СЕТИ
+                tg.showAlert("Ошибка сети/интернета:\n" + error);
                 btn.innerText = lang.order;
                 btn.disabled = false;
             });
+        });
     </script>
 </body>
 </html>
