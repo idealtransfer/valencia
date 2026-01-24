@@ -28,13 +28,18 @@ async def index_handler(request):
     except Exception:
         return web.Response(text="<h1>Сайт работает!</h1><p>Но файл index.html не найден.</p>", content_type='text/html')
 
-# 2. ПРИСЫЛАЕМ КНОПКУ
+# --- ОБНОВЛЕННЫЙ ОБРАБОТЧИК /start ---
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    kb = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text="🚖 Заказать сейчас", web_app=WebAppInfo(url=WEBAPP_URL))]
-    ], resize_keyboard=True)
-    await message.answer("Для заказа трансфера нажмите кнопку:", reply_markup=kb)
+    # Мы убираем ReplyKeyboardMarkup и ReplyKeyboardRemove, чтобы очистить старые кнопки
+    from aiogram.types import ReplyKeyboardRemove
+    
+    await message.answer(
+        "Привет! Я готов к работе. 🚕\n\n"
+        "Чтобы заказать трансфер, нажмите на синюю кнопку <b>«Меню»</b> (или «Заказать») в левом нижнем углу.",
+        parse_mode="HTML",
+        reply_markup=ReplyKeyboardRemove() # Эта строчка удалит кнопки из чата, если они там зависли
+    )
 
 # 3. ЛОВИМ ДАННЫЕ (Самое важное!)
 @dp.message(F.web_app_data)
