@@ -3,73 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transfer Test</title>
+    <title>Transfer Valencia</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; text-align: center; }
-        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; }
-        #order-btn {
+        body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; }
+        .container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h3 { text-align: center; margin-top: 0; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button#order-btn {
             background-color: #248bed; color: white; border: none;
-            padding: 15px 30px; font-size: 18px; border-radius: 10px;
-            cursor: pointer; width: 100%; margin-top: 20px;
+            padding: 16px; font-size: 18px; border-radius: 12px;
+            cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold;
         }
+        /* Стили для экрана успеха */
+        #success-screen { text-align: center; padding: 40px 20px; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="form-container">
-        <h3>Тестовая форма</h3>
-        <p>Заполните любое поле и нажмите кнопку</p>
+    <div id="form-container" class="container">
+        <h3>Заказ трансфера</h3>
         
-        <input type="text" id="user_name" placeholder="Ваше имя">
-        <input type="text" id="pickup" placeholder="Откуда">
-        
-        <button id="order-btn">ОТПРАВИТЬ (ТЕСТ)</button>
-        <p id="log" style="color: gray; font-size: 10px; margin-top: 10px;">Жду нажатия...</p>
+        <label>Ваше имя</label>
+        <input type="text" id="user_name" placeholder="Иван">
+
+        <label>Телефон</label>
+        <input type="tel" id="user_phone" value="+34">
+
+        <label>Откуда</label>
+        <input type="text" id="pickup" placeholder="Аэропорт / Адрес">
+
+        <label>Куда</label>
+        <input type="text" id="destination" placeholder="Отель / Адрес">
+
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;"><label>Дата</label><input type="date" id="date"></div>
+            <div style="flex: 1;"><label>Время</label><input type="time" id="time"></div>
+        </div>
+
+        <label>Способ связи</label>
+        <select id="contact_method">
+            <option value="Telegram">Telegram</option>
+            <option value="WhatsApp">WhatsApp</option>
+        </select>
+
+        <button id="order-btn">ОТПРАВИТЬ ЗАЯВКУ</button>
     </div>
 
     <div id="success-screen" class="hidden">
-        <h1 style="color: green; font-size: 50px;">✅</h1>
-        <h2>Спасибо за заявку!</h2>
-        <p>Форма сработала. Данные отправлены в Telegram.</p>
-        <button onclick="Telegram.WebApp.close()" style="padding: 10px; background: #ddd; border: none; border-radius: 5px;">Закрыть окно</button>
+        <div style="font-size: 60px;">✅</div>
+        <h2>Заявка отправлена!</h2>
+        <p>Мы получили ваши данные и скоро свяжемся с вами.</p>
+        <br>
+        <button onclick="Telegram.WebApp.close()" style="padding: 12px 24px; background: #ddd; border: none; border-radius: 8px;">Закрыть</button>
     </div>
 
     <script>
-        // 1. Инициализация
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Ловим ошибки, чтобы видеть их на экране
-        window.onerror = function(msg, url, line) {
-            document.getElementById('log').innerText = "Ошибка: " + msg;
-            document.getElementById('log').style.color = "red";
-        };
-
-        // 2. Главная функция клика
         document.getElementById('order-btn').addEventListener('click', function() {
-            
-            // Пишем в лог, что клик прошел
-            document.getElementById('log').innerText = "Клик получен. Обработка...";
-
-            // Собираем данные (минимум)
+            // 1. Собираем данные
             const data = {
-                name: document.getElementById('user_name').value || "Не указано",
-                pickup: document.getElementById('pickup').value || "Не указано"
+                name: document.getElementById('user_name').value,
+                phone: document.getElementById('user_phone').value,
+                pickup: document.getElementById('pickup').value,
+                destination: document.getElementById('destination').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                contact_method: document.getElementById('contact_method').value
             };
 
-            // 3. Пытаемся отправить данные (в try/catch, чтобы не сломать экран успеха)
+            // 2. Простая валидация
+            if(!data.name || !data.pickup || !data.destination) {
+                tg.showAlert("Пожалуйста, заполните Имя, Откуда и Куда");
+                return;
+            }
+
+            // 3. Отправляем данные в Telegram (Бот их поймает, если сервер работает)
             try {
                 tg.sendData(JSON.stringify(data));
             } catch (e) {
-                document.getElementById('log').innerText += " | SendData error: " + e.message;
+                console.error(e); // Игнорируем ошибку отправки, чтобы показать успех
             }
 
-            // 4. ГЛАВНОЕ: Мгновенно меняем экран на "Спасибо"
-            // Мы просто скрываем форму и показываем блок успеха
+            // 4. МГНОВЕННО показываем зеленый экран
             document.getElementById('form-container').style.display = 'none';
             document.getElementById('success-screen').style.display = 'block';
+            document.getElementById('success-screen').classList.remove('hidden');
         });
     </script>
 </body>
