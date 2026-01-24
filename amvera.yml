@@ -10,5 +10,4 @@ build:
 run:
   persistenceMount: /data
   scriptName: app.py
-  containerPort: 80
 serviceType: compute
