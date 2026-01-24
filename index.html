@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Valencia</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -16,109 +17,124 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: var(--hint-color); }
         input, select { 
-            width: 100%; padding: 12px; border: 1px solid var(--hint-color); 
+            width: 100%; padding: 12px; border: 1px solid #ccc; 
             border-radius: 10px; background: var(--bg-color); color: var(--text-color);
             box-sizing: border-box; font-size: 16px;
         }
         .row { display: flex; gap: 10px; flex-wrap: wrap; }
         .row > div { flex: 1; min-width: 140px; }
+        
         button#order-btn { 
             width: 100%; padding: 16px; background: var(--btn-color); 
             color: var(--btn-text); border: none; border-radius: 12px; 
             font-size: 17px; font-weight: bold; cursor: pointer; margin-top: 20px;
         }
         h3 { margin-top: 0; text-align: center; }
+
+        /* Стили для экрана успеха */
+        #success-screen { text-align: center; padding: 40px 20px; display: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <h3 id="ui-title">Ваш идеальный трансфер в Валенсии</h3>
-    
-    <div class="form-group">
-        <label id="lbl-pickup">Откуда (адрес или точка)</label>
-        <input type="text" id="pickup" placeholder="Ex: Aeropuerto de Valencia / Address">
-    </div>
 
-    <div class="form-group">
-        <label id="lbl-dest">Куда</label>
-        <input type="text" id="destination" placeholder="Ex: Hotel Las Arenas / Address">
-    </div>
-
-    <div class="row">
+    <div id="form-container">
+        <h3 id="ui-title">Ваш идеальный трансфер в Валенсии</h3>
+        
         <div class="form-group">
-            <label id="lbl-date">Дата</label>
-            <input type="date" id="date">
+            <label id="lbl-pickup">Откуда (адрес или точка)</label>
+            <input type="text" id="pickup" placeholder="Ex: Aeropuerto de Valencia / Address">
+        </div>
+
+        <div class="form-group">
+            <label id="lbl-dest">Куда</label>
+            <input type="text" id="destination" placeholder="Ex: Hotel Las Arenas / Address">
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label id="lbl-date">Дата</label>
+                <input type="date" id="date">
+            </div>
+            <div class="form-group">
+                <label id="lbl-time">Время</label>
+                <input type="time" id="time">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label id="lbl-flight">Номер рейса (если из аэропорта)</label>
+            <input type="text" id="flight" placeholder="Ex: FR2044">
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label id="lbl-adults">Взрослые</label>
+                <input type="number" id="adults" placeholder="1" value="1">
+            </div>
+            <div class="form-group">
+                <label id="lbl-booster">Дети до 135 см (бустер)</label>
+                <input type="number" id="booster" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label id="lbl-child-seat">Дети до 125 см (автокресло)</label>
+                <input type="number" id="child_seat" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label id="lbl-luggage">Чемоданы</label>
+                <input type="number" id="luggage" placeholder="0">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label id="lbl-pay">Оплата</label>
+            <select id="payment">
+                <option value="cash" id="opt-cash">Наличные</option>
+                <option value="card">Visa/MasterCard</option>
+                <option value="paypal">PayPal</option>
+                <option value="bizum">Bizum</option>
+                <option value="wise">Wise</option>
+                <option value="sepa">SEPA transfer (IBAN)</option>
+                <option value="usdt">USDT (Crypto)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label id="lbl-comments">Особые пожелания</label>
+            <input type="text" id="comments" placeholder="Ex: Pet, child age, etc.">
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label id="lbl-name">Имя</label>
+                <input type="text" id="user_name" placeholder="Ivan">
+            </div>
+            <div class="form-group">
+                <label id="lbl-phone">Telegram/WhatsApp</label>
+                <input type="tel" id="user_phone" value="+34">
+            </div>
         </div>
         <div class="form-group">
-            <label id="lbl-time">Время</label>
-            <input type="time" id="time">
+            <label id="lbl-contact-method">Способ связи</label>
+            <select id="contact_method">
+                <option value="Telegram" id="opt-tg">Telegram</option>
+                <option value="WhatsApp" id="opt-wa">WhatsApp</option>
+            </select>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label id="lbl-flight">Номер рейса (если из аэропорта)</label>
-        <input type="text" id="flight" placeholder="Ex: FR2044">
-    </div>
-
-    <div class="row">
-        <div class="form-group">
-            <label id="lbl-adults">Взрослые</label>
-            <input type="number" id="adults" placeholder="1">
-        </div>
-        <div class="form-group">
-            <label id="lbl-booster">Дети до 135 см (бустер)</label>
-            <input type="number" id="booster" placeholder="0">
-        </div>
-        <div class="form-group">
-            <label id="lbl-child-seat">Дети до 125 см (автокресло)</label>
-            <input type="number" id="child_seat" placeholder="0">
-        </div>
-        <div class="form-group">
-            <label id="lbl-luggage">Чемоданы</label>
-            <input type="number" id="luggage" placeholder="0">
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label id="lbl-pay">Оплата</label>
-        <select id="payment">
-            <option value="cash" id="opt-cash">Наличные</option>
-            <option value="card">Visa/MasterCard</option>
-            <option value="paypal">PayPal</option>
-            <option value="bizum">Bizum</option>
-            <option value="wise">Wise</option>
-            <option value="sepa">SEPA transfer (IBAN)</option>
-            <option value="usdt">USDT (Crypto)</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label id="lbl-comments">Особые пожелания</label>
-        <input type="comments" id="comments" placeholder="Ex: Pet, child age, etc.">
-    </div>
-
-    <div class="row">
-        <div class="form-group">
-            <label id="lbl-name">Имя</label>
-            <input type="text" id="user_name" placeholder="Ivan">
-        </div>
-        <div class="form-group">
-            <label id="lbl-phone">Telegram/WhatsApp</label>
-            <input type="tel" id="user_phone" value="+34">
-        </div>
-    </div>
-    <div class="form-group">
-        <label id="lbl-contact-method">Способ связи</label>
-        <select id="contact_method">
-            <option value="Telegram" id="opt-tg">Telegram</option>
-            <option value="WhatsApp" id="opt-wa">WhatsApp</option>
-        </select>
-    </div>
-
-    <p id="ui-notice" style="font-size: 12px; color: var(--hint-color); text-align: center; margin-top: 20px;">
+        <p id="ui-notice" style="font-size: 12px; color: var(--hint-color); text-align: center; margin-top: 20px;">
         После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки.
-        Если у вас возникли трудности, свяжитесь с админом @transfer_vlc
-    </p>
-    <button id="order-btn">Отправить заявку</button>
+        </p>
+        <button id="order-btn">Отправить заявку</button>
+    </div>
+
+    <div id="success-screen">
+        <div style="font-size: 60px;">✅</div>
+        <h2 id="success-title">Заявка принята!</h2>
+        <p id="success-text">Мы свяжемся с вами в ближайшее время.</p>
+        <br>
+        <button onclick="Telegram.WebApp.close()" style="padding: 12px 24px; background: #ddd; border: none; border-radius: 8px;">Закрыть</button>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -141,7 +157,7 @@
                 adults: "Adultos", booster: "Niños hasta 135 cm (booster)", child_seat: "Niños hasta 125 cm (silla)",
                 luggage: "Equipaje", pay: "Pago", comments: "Peticiones especiales", name: "Nombre", phone: "Telegram/WhatsApp", 
                 order: "Enviar solicitud", cash: "Efectivo",
-                notice: "Tras la reserva, nos pondremos en contacto contigo lo antes posible para confirmar los detalles y el precio. El pago se realiza al finalizar el viaje. Si tienes alguna dificultad, póngase en contacto con el admin @transfer_vlc",
+                notice: "Tras la reserva, nos pondremos en contacto contigo lo antes posible para confirmar los detalles y el precio. El pago se realiza al finalizar el viaje.",
                 contact_method: "Método de contacto preferido",
                 error: "Por favor, rellene todos los campos obligatorios"
             },
@@ -151,16 +167,16 @@
                 adults: "Adults", booster: "Children up to 135 cm (booster)", child_seat: "Children up to 125 cm (car seat)",
                 luggage: "Luggage", pay: "Payment", comments: "Special requests", name: "Name", phone: "Telegram/WhatsApp", 
                 order: "Send Request", cash: "Cash",
-                notice: "After booking, we will contact you shortly to clarify the details and the cost. Payment is made at the end of the trip. If you have any difficulties, please contact the admin @transfer_vlc",
+                notice: "After booking, we will contact you shortly to clarify the details and the cost. Payment is made at the end of the trip.",
                 contact_method: "Preferred contact method",
                 error: "Please fill in all required fields"
             }
         };
 
-        // Защита от ошибки, если user не определен
         const userLang = (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code) || 'ru';
         const lang = translations[userLang] || translations.ru;
 
+        // Применяем переводы
         document.getElementById('ui-title').innerText = lang.title;
         document.getElementById('ui-notice').innerText = lang.notice;
         document.getElementById('lbl-pickup').innerText = lang.pickup;
@@ -194,7 +210,7 @@
                 payment: document.getElementById('payment').value,
                 comments: document.getElementById('comments').value,
                 name: document.getElementById('user_name').value,
-                phone: document.getElementById('user_phone').value, // Здесь была пропущена запятая
+                phone: document.getElementById('user_phone').value,
                 contact_method: document.getElementById('contact_method').value,
                 language: userLang
             };
@@ -206,7 +222,15 @@
             }
 
             // ОТПРАВКА ДАННЫХ
-            tg.sendData(JSON.stringify(data));
+            try {
+                tg.sendData(JSON.stringify(data));
+            } catch (e) {
+                console.error("Ошибка отправки в Telegram", e);
+            }
+
+            // ПОКАЗЫВАЕМ ЭКРАН УСПЕХА
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('success-screen').style.display = 'block';
         });
     </script>
 </body>
