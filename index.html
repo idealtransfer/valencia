@@ -200,26 +200,29 @@
             btn.innerText = "...";
             btn.disabled = true;
 
+// ОТПРАВКА НА СЕРВЕР
             fetch('/submit_order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(res => {
+            .then(async res => {
                 if(res.ok) {
                     document.getElementById('form-container').style.display = 'none';
                     document.getElementById('success-screen').style.display = 'block';
                     tg.HapticFeedback.notificationOccurred('success');
                 } else {
-                    tg.showAlert("Error");
+                    const errText = await res.text();
+                    tg.showAlert("Ошибка сервера: " + res.status + "\n" + errText);
+                    btn.innerText = lang.order;
                     btn.disabled = false;
                 }
             })
-            .catch(() => {
-                tg.showAlert("Network Error");
+            .catch(err => {
+                tg.showAlert("Ошибка сети: " + err.message);
+                btn.innerText = lang.order;
                 btn.disabled = false;
             });
-        });
     </script>
 </body>
 </html>
