@@ -9,10 +9,10 @@ from aiogram.types import ReplyKeyboardRemove
 
 # Настройка логов
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 TOKEN = os.getenv('BOT_TOKEN')
 ADMIN_ID = os.getenv('ADMIN_ID')
-# ВСТАВЬТЕ ВАШУ ССЫЛКУ СЮДА:
 WEBAPP_URL = "https://idealtransfer-idealtransfer.amvera.io" 
 
 bot = Bot(token=TOKEN)
@@ -25,45 +25,59 @@ async def index_handler(request):
     try:
         with open('index.html', 'r', encoding='utf-8') as f:
             return web.Response(text=f.read(), content_type='text/html')
-    except Exception:
-        return web.Response(text="Error loading site", status=500)
+    except Exception as e:
+        logger.error(f"Index error: {e}")
+        return web.Response(text="File index.html not found", status=404)
 
-# 2. НОВЫЙ МЕХАНИЗМ: Принимаем заказ напрямую от сайта
+# 2. ПРИЕМ ЗАКАЗА
 @routes.post('/submit_order')
 async def submit_order_handler(request):
     try:
         data = await request.json()
+        logger.info(f"Received order: {data}")
         
-        # Формируем текст
         text = (
-            f"✅ <b>НОВЫЙ ЗАКАЗ</b> (Site)\n"
+            f"🚕 <b>НОВЫЙ ЗАКАЗ</b>\n"
+            f"━━━━━━━━━━━━\n"
             f"👤 <b>Имя:</b> {data.get('name')}\n"
             f"📞 <b>Тел:</b> {data.get('phone')} ({data.get('contact_method')})\n"
-            f"🛫 <b>Откуда:</b> {data.get('pickup')}\n"
-            f"🏨 <b>Куда:</b> {data.get('destination')}\n"
-            f"📅 <b>Дата:</b> {data.get('date')} {data.get('time')}\n"
-            f"✈️ <b>Рейс:</b> {data.get('flight')}\n"
-            f"💰 <b>Оплата:</b> {data.get('payment')}\n"
-            f"🧳 <b>Багаж:</b> {data.get('luggage')}\n"
-            f"👶 <b>Дети:</b> Бустер: {data.get('booster')}, Кресло: {data.get('child_seat')}\n"
-            f"📝 <b>Коммент:</b> {data.get('comments')}"
+            f"📍 <b>Откуда:</b> {data.get('pickup')}\n"
+            f"🏁 <b>Куда:</b> {data.get('destination')}\n"
+            f"📅 <b>Когда:</b> {data.get('date')} в {data.get('time')}\n"
+            f"✈️ <b>Рейс:</b> {data.get('flight', '-')}\n"
+            f"💳 <b>Оплата:</b> {data.get('payment')}\n"
+            f"━━━━━━━━━━━━\n"
+            f"👥 <b>Пассажиры:</b> {data.get('adults', 1)} взр.\n"
+            f"🧳 <b>Багаж:</b> {data.get('luggage', 0)} шт.\n"
+            f"👶 <b>Детские кресла:</b>\n"
+            f"   - Бустеры: {data.get('booster', 0)}\n"
+            f"   - Автокресла: {data.get('child_seat', 0)}\n"
+            f"💬 <b>Пожелания:</b> {data.get('comments', '-')}"
         )
 
-        # 1. Отправляем АДМИНУ
+        # Отправка админу
         if ADMIN_ID:
-            await bot.send_message(chat_id=ADMIN_ID, text=text, parse_mode="HTML")
+            try:
+                # Убираем возможные пробелы из ID
+                clean_admin_id = str(ADMIN_ID).strip()
+                await bot.send_message(chat_id=clean_admin_id, text=text, parse_mode="HTML")
+            except Exception as bot_err:
+                logger.error(f"Failed to send to admin: {bot_err}")
 
-        # 2. Отправляем КЛИЕНТУ (если есть его ID)
+        # Отправка клиенту
         user_id = data.get('user_id')
         if user_id:
-            await bot.send_message(chat_id=user_id, text="✅ Ваш заказ принят! Мы скоро свяжемся с вами.")
+            try:
+                await bot.send_message(chat_id=user_id, text="✅ Заявка принята! Мы скоро свяжемся с вами.")
+            except:
+                pass
 
         return web.json_response({'status': 'ok'})
     except Exception as e:
-        logging.error(f"Order error: {e}")
+        logger.error(f"Global handler error: {e}")
         return web.json_response({'status': 'error', 'message': str(e)}, status=500)
 
-# 3. КОМАНДА /START (Просто приветствие, удаляем старые кнопки)
+# 3. КОМАНДА /START
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     await message.answer(
@@ -81,8 +95,7 @@ async def main():
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 80)
     await site.start()
-    logging.info("Server started on port 80")
-
+    
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
