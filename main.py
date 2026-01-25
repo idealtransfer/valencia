@@ -32,7 +32,7 @@ async def index_handler(request):
         return web.Response(text="Error: index.html not found", status=404)
 
 # 2. ПРИЕМ ЗАКАЗОВ (Вот этого куска у вас сейчас не хватает или он старый!)
-@routes.post('/submit_order')
+@routes.post('/api/send')
 async def submit_order_handler(request):
     try:
         # Читаем данные от формы
