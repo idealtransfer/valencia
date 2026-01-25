@@ -50,7 +50,7 @@ async def submit_order_handler(request):
             f"👤 <b>Имя:</b> {data.get('name')}\n"
             f"📞 <b>Телефон:</b> {data.get('phone')}\n"
             f"💬 <b>Связь:</b> {data.get('contact_method')}\n"
-            f"📱 <b>TG Ник:</b> {data.get('user_nick')}\n"
+            f"📱 <b>TG Ник:</b> {data.get('nick')}\n"
             f"━━━━━━━━━━━━━━━━\n"
             f"📍 <b>Откуда:</b> {data.get('pickup')}\n"
             f"🏁 <b>Куда:</b> {data.get('destination')}\n"
