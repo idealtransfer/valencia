@@ -226,34 +226,28 @@
                 btn.innerText = "⏳...";
                 btn.disabled = true;
 
-                fetch('/submit_order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                })
-                .then(async res => {
-                    if(res.ok) {
-                        document.getElementById('form-container').style.display = 'none';
-                        document.getElementById('success-screen').style.display = 'block';
-                        tg.HapticFeedback.notificationOccurred('success');
-                    } else {
-                        const txt = await res.text();
-                        logError("Сервер ответил ошибкой: " + res.status + "\n" + txt);
-                        tg.showAlert("Ошибка сервера! См. лог внизу.");
-                        btn.innerText = originalText;
-                        btn.disabled = false;
-                    }
-                })
-                .catch(err => {
-                    logError("Ошибка сети/fetch: " + err.message);
-                    tg.showAlert("Ошибка сети! См. лог внизу.");
-                    btn.innerText = originalText;
-                    btn.disabled = false;
+try {
+                // ВНИМАНИЕ: Новый адрес /api/send
+                const res = await fetch('/api/send', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(data) 
                 });
-
+                
+                if(res.ok) {
+                    document.getElementById('form-container').style.display = 'none';
+                    document.getElementById('success-screen').style.display = 'block';
+                    tg.HapticFeedback.notificationOccurred('success');
+                } else {
+                    const txt = await res.text();
+                    document.getElementById('debug-console').style.display = 'block';
+                    document.getElementById('debug-console').innerText = "ОШИБКА СЕРВЕРА: " + res.status + "\n" + txt;
+                    btn.innerText = L.order; btn.disabled = false;
+                }
             } catch (e) {
-                logError("КРИТИЧЕСКАЯ ОШИБКА ВНУТРИ КЛИКА: " + e.message);
-                alert("Ошибка скрипта: " + e.message);
+                document.getElementById('debug-console').style.display = 'block';
+                document.getElementById('debug-console').innerText = "ОШИБКА СЕТИ: " + e.message;
+                btn.disabled = false;
             }
         });
     </script>
