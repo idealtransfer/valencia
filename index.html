@@ -32,6 +32,12 @@
         h3 { margin-top: 0; text-align: center; color: var(--btn-color); }
         #success-screen { text-align: center; padding: 50px 20px; display: none; }
         #ui-notice { font-size: 12px; color: var(--hint-color); text-align: center; margin-top: 20px; line-height: 1.3; }
+
+        /* БЛОК ДЛЯ ОТОБРАЖЕНИЯ ОШИБОК (Появится только если что-то сломается) */
+        #debug-console {
+            margin-top: 20px; padding: 10px; border: 2px solid red; background: #fff0f0; 
+            color: red; font-size: 12px; display: none; white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
@@ -103,6 +109,8 @@
         <p id="ui-notice">После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки.</p>
 
         <button id="order-btn">Отправить заявку</button>
+        
+        <div id="debug-console"></div>
     </div>
 
     <div id="success-screen">
@@ -113,10 +121,22 @@
     </div>
 
     <script>
+        // === ФУНКЦИЯ ОТЛАДКИ (ПОКАЖЕТ ОШИБКУ НА ЭКРАНЕ) ===
+        function logError(msg) {
+            const el = document.getElementById('debug-console');
+            el.style.display = 'block';
+            el.innerText += "ОШИБКА: " + msg + "\n";
+            console.error(msg);
+        }
+
+        window.onerror = function(message, source, lineno) {
+            logError("JS Error: " + message + " (Line: " + lineno + ")");
+        };
+
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. СЛОВАРЬ ПЕРЕВОДОВ (Ничего не удалено)
+        // === ПОЛНЫЕ ПЕРЕВОДЫ ===
         const translations = {
             ru: {
                 title: "Ваш идеальный трансфер в Валенсии", pickup: "Откуда (адрес или точка)", dest: "Куда", 
@@ -124,7 +144,7 @@
                 child_seat: "Автокресло (до 125см)", luggage: "Чемоданы", pay: "Способ оплаты", 
                 comments: "Особые пожелания", name: "Ваше имя", phone: "Телефон", contact: "Способ связи",
                 order: "Отправить заявку", cash: "Наличные (Cash)", success_t: "Заявка принята!",
-                success_p: "Мы свяжемся с вами в ближайшее время.", error: "Заполните обязательные поля: Откуда, Куда, Имя, Телефон",
+                success_p: "Мы свяжемся с вами в ближайшее время.", error: "Пожалуйста, заполните основные поля: Откуда, Куда, Имя, Телефон",
                 notice: "После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки."
             },
             en: {
@@ -150,7 +170,6 @@
         const userLang = tg.initDataUnsafe?.user?.language_code || 'ru';
         const lang = translations[userLang] || translations.ru;
 
-        // ПРИМЕНЕНИЕ ЯЗЫКА
         try {
             document.getElementById('ui-title').innerText = lang.title;
             document.getElementById('lbl-pickup').innerText = lang.pickup;
@@ -173,66 +192,69 @@
             document.getElementById('success-title').innerText = lang.success_t;
             document.getElementById('success-text').innerText = lang.success_p;
         } catch (e) {
-            console.error("Ошибка перевода: ", e);
+            logError("Ошибка применения перевода: " + e.message);
         }
 
-        // 2. ОБРАБОТКА НАЖАТИЯ (Исправленная логика)
+        // === ГЛАВНАЯ ЛОГИКА ===
         document.getElementById('order-btn').addEventListener('click', function() {
-            // Собираем данные
-            const data = {
-                pickup: document.getElementById('pickup').value,
-                destination: document.getElementById('destination').value,
-                date: document.getElementById('date').value,
-                time: document.getElementById('time').value,
-                flight: document.getElementById('flight').value,
-                adults: document.getElementById('adults').value,
-                booster: document.getElementById('booster').value,
-                child_seat: document.getElementById('child_seat').value,
-                luggage: document.getElementById('luggage').value,
-                payment: document.getElementById('payment').value,
-                comments: document.getElementById('comments').value,
-                name: document.getElementById('user_name').value,
-                phone: document.getElementById('user_phone').value,
-                contact_method: document.getElementById('contact_method').value,
-                user_id: tg.initDataUnsafe?.user?.id
-            };
+            try {
+                const data = {
+                    pickup: document.getElementById('pickup').value,
+                    destination: document.getElementById('destination').value,
+                    date: document.getElementById('date').value,
+                    time: document.getElementById('time').value,
+                    flight: document.getElementById('flight').value,
+                    adults: document.getElementById('adults').value,
+                    booster: document.getElementById('booster').value,
+                    child_seat: document.getElementById('child_seat').value,
+                    luggage: document.getElementById('luggage').value,
+                    payment: document.getElementById('payment').value,
+                    comments: document.getElementById('comments').value,
+                    name: document.getElementById('user_name').value,
+                    phone: document.getElementById('user_phone').value,
+                    contact_method: document.getElementById('contact_method').value,
+                    user_id: tg.initDataUnsafe?.user?.id
+                };
 
-            // Валидация
-            if(!data.pickup || !data.destination || !data.name || !data.phone) {
-                tg.showAlert(lang.error);
-                return;
-            }
-
-            const btn = document.getElementById('order-btn');
-            btn.innerText = "⏳...";
-            btn.disabled = true;
-
-            // Отправка (c подробным отчетом об ошибке)
-            fetch('/submit_order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(async response => {
-                if(response.ok) {
-                    // УСПЕХ
-                    document.getElementById('form-container').style.display = 'none';
-                    document.getElementById('success-screen').style.display = 'block';
-                    tg.HapticFeedback.notificationOccurred('success');
-                } else {
-                    // ОШИБКА СЕРВЕРА (например 500)
-                    const errorText = await response.text();
-                    tg.showAlert("Ошибка сервера (" + response.status + "):\n" + errorText);
-                    btn.innerText = lang.order;
-                    btn.disabled = false;
+                if(!data.pickup || !data.destination || !data.name || !data.phone) {
+                    tg.showAlert(lang.error);
+                    return;
                 }
-            })
-            .catch(error => {
-                // ОШИБКА СЕТИ
-                tg.showAlert("Ошибка сети/интернета:\n" + error);
-                btn.innerText = lang.order;
-                btn.disabled = false;
-            });
+
+                const btn = document.getElementById('order-btn');
+                const originalText = btn.innerText;
+                btn.innerText = "⏳...";
+                btn.disabled = true;
+
+                fetch('/submit_order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(async res => {
+                    if(res.ok) {
+                        document.getElementById('form-container').style.display = 'none';
+                        document.getElementById('success-screen').style.display = 'block';
+                        tg.HapticFeedback.notificationOccurred('success');
+                    } else {
+                        const txt = await res.text();
+                        logError("Сервер ответил ошибкой: " + res.status + "\n" + txt);
+                        tg.showAlert("Ошибка сервера! См. лог внизу.");
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    logError("Ошибка сети/fetch: " + err.message);
+                    tg.showAlert("Ошибка сети! См. лог внизу.");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
+
+            } catch (e) {
+                logError("КРИТИЧЕСКАЯ ОШИБКА ВНУТРИ КЛИКА: " + e.message);
+                alert("Ошибка скрипта: " + e.message);
+            }
         });
     </script>
 </body>
