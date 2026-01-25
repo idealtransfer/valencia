@@ -92,7 +92,7 @@
             <div class="form-group"><label id="lbl-phone">Телефон</label><input type="tel" id="user_phone" value="+34"></div>
             <div class="form-group">
                 <label id="lbl-nick">Ник в Telegram (необязательно)</label>
-                <input type="text" id="nick" placeholder="@username">
+                <input type="text" id="user_nick" placeholder="@username">
             </div>
         </div>
 
@@ -195,6 +195,7 @@
                     name: document.getElementById('user_name').value,
                     phone: document.getElementById('user_phone').value,
                     contact_method: document.getElementById('contact_method').value,
+                    nick: document.getElementById('user_nick').value,
                     user_id: tg.initDataUnsafe?.user?.id
                 };
 
