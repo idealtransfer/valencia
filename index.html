@@ -32,11 +32,6 @@
         h3 { margin-top: 0; text-align: center; color: var(--btn-color); }
         #success-screen { text-align: center; padding: 50px 20px; display: none; }
         #ui-notice { font-size: 12px; color: var(--hint-color); text-align: center; margin-top: 20px; line-height: 1.3; }
-
-        #debug-console {
-            margin-top: 20px; padding: 10px; border: 2px solid red; background: #fff0f0; 
-            color: red; font-size: 12px; display: none; white-space: pre-wrap;
-        }
     </style>
 </head>
 <body>
@@ -108,8 +103,6 @@
         <p id="ui-notice">После бронирования мы свяжемся с вами в ближайшее время для уточнения деталей и стоимости. Оплата производится по окончании поездки.</p>
 
         <button id="order-btn">Отправить заявку</button>
-        
-        <div id="debug-console"></div>
     </div>
 
     <div id="success-screen">
@@ -120,17 +113,6 @@
     </div>
 
     <script>
-        function logError(msg) {
-            const el = document.getElementById('debug-console');
-            el.style.display = 'block';
-            el.innerText += "ОШИБКА: " + msg + "\n";
-            console.error(msg);
-        }
-
-        window.onerror = function(message, source, lineno) {
-            logError("JS Error: " + message + " (Line: " + lineno + ")");
-        };
-
         const tg = window.Telegram.WebApp;
         tg.expand();
 
@@ -189,10 +171,9 @@
             document.getElementById('success-title').innerText = lang.success_t;
             document.getElementById('success-text').innerText = lang.success_p;
         } catch (e) {
-            logError("Ошибка применения перевода: " + e.message);
+            console.error(e);
         }
 
-        // ВАЖНО: Добавлено слово async, чтобы работал await
         document.getElementById('order-btn').addEventListener('click', async function() {
             try {
                 const data = {
@@ -222,7 +203,7 @@
                 btn.innerText = "⏳...";
                 btn.disabled = true;
 
-                // Отправляем на /api/send
+                // Отправляем на сервер (CORS теперь разрешен)
                 const res = await fetch('/api/send', { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
@@ -234,16 +215,12 @@
                     document.getElementById('success-screen').style.display = 'block';
                     tg.HapticFeedback.notificationOccurred('success');
                 } else {
-                    const txt = await res.text();
-                    document.getElementById('debug-console').style.display = 'block';
-                    document.getElementById('debug-console').innerText = "ОШИБКА СЕРВЕРА: " + res.status + "\n" + txt;
-                    // Используем lang.order, а не L.order
+                    tg.showAlert("Ошибка сервера! Попробуйте позже.");
                     btn.innerText = lang.order; 
                     btn.disabled = false;
                 }
             } catch (e) {
-                document.getElementById('debug-console').style.display = 'block';
-                document.getElementById('debug-console').innerText = "ОШИБКА СЕТИ: " + e.message;
+                tg.showAlert("Ошибка соединения! Проверьте интернет.");
                 const btn = document.getElementById('order-btn');
                 btn.innerText = lang.order;
                 btn.disabled = false;
