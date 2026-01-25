@@ -46,14 +46,15 @@ async def submit_order_handler(request):
     try:
         data = await request.json()
         logger.info(f"New Order Received: {data}")
-        
+        raw_nick = data.get('nick', '')
+        nick_display = f"@{raw_nick}" if raw_nick and not raw_nick.startswith('@') else (raw_nick or "-")
         # Формируем красивое сообщение для Админа
         text = (
             f"🚖 <b>НОВЫЙ ЗАКАЗ</b>\n"
             f"━━━━━━━━━━━━━━━━\n"
             f"👤 <b>Имя:</b> {data.get('name')}\n"
             f"📞 <b>Телефон:</b> {data.get('phone')}\n"
-            f"📱 <b>Ник в ТГ:</b> {data.get('nick')}\n"
+            f"📱 <b>TG Ник:</b> {nick_display}\n"
             f"💬 <b>Связь:</b> {data.get('contact_method')}\n"
             f"━━━━━━━━━━━━━━━━\n"
             f"📍 <b>Откуда:</b> {data.get('pickup')}\n"
