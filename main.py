@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardRemove
 
-# 1. НАСТРОЙКИ
+# НАСТРОЙКИ
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,6 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 routes = web.RouteTableDef()
 
-# Вспомогательная функция для ответов (защита от CORS ошибок)
 def json_response(data, status=200):
     return web.json_response(
         data,
@@ -30,7 +29,6 @@ def json_response(data, status=200):
         }
     )
 
-# 2. ОТДАЕМ САЙТ (Главная страница)
 @routes.get('/')
 async def index_handler(request):
     try:
@@ -40,21 +38,23 @@ async def index_handler(request):
         logger.error(f"Error loading index.html: {e}")
         return web.Response(text="Site is loading...", status=500)
 
-# 3. ПРИНИМАЕМ ЗАКАЗ (API)
 @routes.post('/api/send')
 async def submit_order_handler(request):
     try:
         data = await request.json()
         logger.info(f"New Order Received: {data}")
         
-        # Формируем красивое сообщение для Админа
+        # Получаем ник (если он есть, добавляем @, если нет - прочерк)
+        raw_nick = data.get('nick', '')
+        nick_display = f"@{raw_nick}" if raw_nick and not raw_nick.startswith('@') else (raw_nick or "-")
+
         text = (
             f"🚖 <b>НОВЫЙ ЗАКАЗ</b>\n"
             f"━━━━━━━━━━━━━━━━\n"
             f"👤 <b>Имя:</b> {data.get('name')}\n"
             f"📞 <b>Телефон:</b> {data.get('phone')}\n"
-            f"📱 <b>TG Ник:</b> {data.get('nick')}\n"
             f"💬 <b>Связь:</b> {data.get('contact_method')}\n"
+            f"📱 <b>TG Ник:</b> {nick_display}\n"
             f"━━━━━━━━━━━━━━━━\n"
             f"📍 <b>Откуда:</b> {data.get('pickup')}\n"
             f"🏁 <b>Куда:</b> {data.get('destination')}\n"
@@ -68,14 +68,12 @@ async def submit_order_handler(request):
             f"📝 <b>Пожелания:</b> {data.get('comments', '-')}"
         )
 
-        # Отправка Админу
         if ADMIN_ID:
             try:
                 await bot.send_message(chat_id=ADMIN_ID, text=text, parse_mode="HTML")
             except Exception as e:
                 logger.error(f"Telegram Send Error: {e}")
 
-        # Отправка Клиенту (подтверждение)
         user_id = data.get('user_id')
         if user_id:
             try:
@@ -85,7 +83,7 @@ async def submit_order_handler(request):
                     parse_mode="HTML"
                 )
             except Exception:
-                pass # Если клиент заблокировал бота, не падаем
+                pass
 
         return json_response({'status': 'ok'})
 
@@ -93,7 +91,6 @@ async def submit_order_handler(request):
         logger.error(f"API Processing Error: {e}")
         return json_response({'error': str(e)}, status=500)
 
-# Обработка pre-flight запросов браузера (чтобы не было ошибок 405/CORS)
 @routes.options('/api/send')
 async def options_handler(request):
     return web.Response(status=200, headers={
@@ -102,7 +99,6 @@ async def options_handler(request):
         "Access-Control-Allow-Headers": "Content-Type"
     })
 
-# 4. КОМАНДА /START
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     await message.answer(
@@ -112,20 +108,14 @@ async def cmd_start(message: types.Message):
         reply_markup=ReplyKeyboardRemove()
     )
 
-# 5. ЗАПУСК ПРИЛОЖЕНИЯ
 async def main():
     app = web.Application()
     app.add_routes(routes)
-    
     runner = web.AppRunner(app)
     await runner.setup()
-    
-    # Amvera требует порт 80
     site = web.TCPSite(runner, '0.0.0.0', 80)
     await site.start()
     logger.info("✅ Server started on port 80")
-    
-    # Запуск бота
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
