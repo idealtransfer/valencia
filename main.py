@@ -68,8 +68,8 @@ async def submit_order_handler(request):
             f"✈️ <b>Рейс:</b> {data.get('flight', '-')}\n"
             f"━━━━━━━━━━━━━━━━\n"
             f"👥 <b>Пассажиры:</b> {data.get('adults')} взр.\n"
-            f"🧳 <b>Багаж:</b> {data.get('luggage', 0)}\n"
             f"👶 <b>Дети:</b> Бустер: {data.get('booster', 0)} | Кресло: {data.get('child_seat', 0)}\n"
+            f"🧳 <b>Багаж:</b> {data.get('luggage', 0)}\n"
             f"💳 <b>Оплата:</b> {data.get('payment')}\n"
             f"📝 <b>Пожелания:</b> {data.get('comments', '-')}"
         )
