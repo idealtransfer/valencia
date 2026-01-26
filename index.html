@@ -48,18 +48,18 @@
         <h3 id="ui-title" style="font-size: 16px; margin-top: 5px;">Ваш идеальный трансфер в Валенсии</h3>
         
         <div class="form-group">
-            <label id="lbl-pickup">Откуда (адрес или точка)</label>
+            <label id="lbl-pickup" class="required>Откуда (адрес или точка)</label>
             <input type="text" id="pickup" placeholder="Ex: Aeropuerto de Valencia / Address">
         </div>
 
         <div class="form-group">
-            <label id="lbl-dest">Куда</label>
+            <label id="lbl-dest class="required">Куда</label>
             <input type="text" id="destination" placeholder="Ex: Hotel Las Arenas / Address">
         </div>
 
         <div class="row">
-            <div class="form-group"><label id="lbl-date">Дата</label><input type="date" id="date"></div>
-            <div class="form-group"><label id="lbl-time">Время</label><input type="time" id="time"></div>
+            <div class="form-group"><label id="lbl-date class="required">Дата</label><input type="date" id="date"></div>
+            <div class="form-group"><label id="lbl-time class="required">Время</label><input type="time" id="time"></div>
         </div>
 
         <div class="form-group">
@@ -68,7 +68,7 @@
         </div>
 
         <div class="row">
-            <div class="form-group"><label id="lbl-adults">Взрослые</label><input type="number" id="adults" value="1" min="1"></div>
+            <div class="form-group"><label id="lbl-adults" class="required>Взрослые</label><input type="number" id="adults" value="1" min="1"></div>
             <div class="form-group"><label id="lbl-booster">Дети в бустере</label><input type="number" id="booster" placeholder="0"></div>                       
         </div>
 
@@ -96,8 +96,8 @@
         </div>
 
         <div class="row">
-            <div class="form-group"><label id="lbl-name">Ваше имя</label><input type="text" id="user_name" placeholder="Ivan"></div>
-            <div class="form-group"><label id="lbl-phone">Телефон</label><input type="tel" id="user_phone" value="+34"></div>
+            <div class="form-group"><label id="lbl-name class="required">Ваше имя</label><input type="text" id="user_name" placeholder="Ivan"></div>
+            <div class="form-group"><label id="lbl-phone class="required">Телефон</label><input type="tel" id="user_phone" value="+34"></div>
             <div class="form-group"><label id="lbl-nick">Ник в Telegram (необязательно)</label><input type="text" id="user_nick" placeholder="@username"></div>
         </div>
 
