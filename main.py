@@ -85,7 +85,8 @@ async def submit_order_handler(request):
             try:
                 await bot.send_message(
                     chat_id=user_id, 
-                    text="✅ <b>Ваша заявка принята!</b>\nМы свяжемся с вами в ближайшее время для подтверждения.",
+                    text="✅ <b>Ваша заявка принята!</b>\nМы свяжемся с вами в ближайшее время для подтверждения.\n\n
+                    <b>Your application has been accepted!</b>\nWe will contact you soon for confirmation.",
                     parse_mode="HTML"
                 )
             except Exception:
@@ -109,7 +110,9 @@ async def options_handler(request):
 async def cmd_start(message: types.Message):
     await message.answer(
         "👋 Добро пожаловать!\n\n"
-        "Чтобы заказать трансфер, нажмите синюю кнопку <b>«Меню»</b> или <b>«Заказать трансфер»</b> внизу экрана.",
+        "Чтобы заказать трансфер, нажмите синюю кнопку <b>«Меню»</b> или <b>«Заказать трансфер»</b> внизу экрана."
+        "👋 Welcome!\n\n"
+        "To order the transfer, press the blue button <b>«Menu»</b> or <b>«Order Transfer»</b> below.",
         parse_mode="HTML",
         reply_markup=ReplyKeyboardRemove()
     )
