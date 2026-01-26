@@ -81,6 +81,7 @@ async def submit_order_handler(request):
                 logger.error(f"Telegram Send Error: {e}")
 
         user_id = data.get('user_id')
+        user_id = data.get('user_id')
         if user_id:
             try:
                 await bot.send_message(
@@ -91,6 +92,8 @@ async def submit_order_handler(request):
                         "✅ <b>Your application has been accepted!</b>\n"
                         "We will contact you soon for confirmation."
                     ),
+                    parse_mode="HTML"
+                )
             except Exception:
                 pass
 
