@@ -85,10 +85,12 @@ async def submit_order_handler(request):
             try:
                 await bot.send_message(
                     chat_id=user_id, 
-                    text="✅ <b>Ваша заявка принята!</b>\nМы свяжемся с вами в ближайшее время для подтверждения.\n\n
-                    <b>Your application has been accepted!</b>\nWe will contact you soon for confirmation.",
-                    parse_mode="HTML"
-                )
+                    text=(
+                        "✅ <b>Ваша заявка принята!</b>\n"
+                        "Мы свяжемся с вами в ближайшее время для подтверждения.\n\n"
+                        "✅ <b>Your application has been accepted!</b>\n"
+                        "We will contact you soon for confirmation."
+                    ),
             except Exception:
                 pass
 
