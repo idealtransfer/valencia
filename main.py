@@ -38,6 +38,16 @@ async def index_handler(request):
         logger.error(f"Error loading index.html: {e}")
         return web.Response(text="Site is loading...", status=500)
 
+# --- НОВОЕ: ОТДАЕМ ЛОГОТИП ---
+@routes.get('/logo.png')
+async def logo_handler(request):
+    try:
+        # Эта команда отправляет файл картинки браузеру
+        return web.FileResponse('logo.png')
+    except Exception as e:
+        logger.error(f"Logo error: {e}")
+        return web.Response(status=404)
+        
 @routes.post('/api/send')
 async def submit_order_handler(request):
     try:
